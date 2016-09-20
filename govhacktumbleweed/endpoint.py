@@ -118,6 +118,7 @@ class StoreClick(webapp2.RequestHandler):
       logging.debug(installation_id)
       logging.debug(record_id)
       logging.debug(playground_name)
+      logging.debug('dummy log')
       Click(installation_id=installation_id, 
             record_id=int(record_id), 
             playground_name=playground_name,
