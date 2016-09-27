@@ -118,7 +118,6 @@ class StoreClick(webapp2.RequestHandler):
       logging.debug(installation_id)
       logging.debug(record_id)
       logging.debug(playground_name)
-      logging.debug('dummy log')
       Click(installation_id=installation_id, 
             record_id=int(record_id), 
             playground_name=playground_name,
@@ -132,7 +131,8 @@ class Favorites(ndb.Model):
     record_id_list = ndb.IntegerProperty(repeated=True)
     playground_name_list = ndb.StringProperty(repeated=True)
                                            
-class RegisterFavorite(webapp2.RequestHandler):
+class FavoriteEndpoint(webapp2.RequestHandler):
+
     """register a playground as a favorite"""
     def post(self):
       installation_id = self.request.POST.get('installation_id')
@@ -154,7 +154,22 @@ class RegisterFavorite(webapp2.RequestHandler):
                   playground_name_list=[playground_name]).put()
       self.response.status = 200   
 
+    """get a list of favorite playgrounds"""
+    def get(self):
+      installation_id = self.request.get('installation_id')
+      favorites = Favorites.query(Favorites.installation_id == installation_id).fetch(1)
+      if len(favorites) > 0 :
+        body = {'record_id_list': favorites[0].record_id_list, 'playground_name_list': favorites[0].playground_name_list}
+      else:
+         body = {'record_id_list': [], 'playground_name_list': []}
+      self.response.status = 200
+      self.response.headers['Content-Type'] = 'application/json'   
+      self.response.out.write(json.dumps(body))
+
 
 APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/rating', RatingEndpoint),
-                                       ('/register_favorite', RegisterFavorite)], debug=True)
+                                       ('/favorite', FavoriteEndpoint)], debug=True)
+
+
+
