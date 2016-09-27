@@ -9,7 +9,8 @@
     <string name="action_map_type_hybrid">Satellite</string>
     <string name="title_activity_maps">Map</string>
     <string name="store_click_url">https://govhacktumbleweed.appspot.com/store_click</string>
-    <string name="register_favorite_url">https://govhacktumbleweed.appspot.com/register_favorite</string>
+    <string name="register_favorite_url">https://govhacktumbleweed.appspot.com/favorite</string>
+    <string name="get_favorite_url">https://govhacktumbleweed.appspot.com/favorite</string>
     <string name="rating_url">https://govhacktumbleweed.appspot.com/rating</string>
 
 

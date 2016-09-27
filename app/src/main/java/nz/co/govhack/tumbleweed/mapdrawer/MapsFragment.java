@@ -8,6 +8,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -40,7 +42,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
          ClusterManager.OnClusterClickListener<PlaygroundMarker>{
 
     private GoogleMap mMap;
-    private JSONArray parksJson;
+    //private JSONArray parksJson;
     private UiSettings mUiSettings;
 
     private double defaultLat = -41;
@@ -78,12 +80,14 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        /*
         String json = Utils.loadJSONFromAsset(getActivity().getApplicationContext().getAssets());
         try {
             parksJson = new JSONArray(json);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        */
 
     }
 
@@ -116,73 +120,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         mMarkers = new HashMap<>();
         mPlaygroundMarkers = new HashMap<>();
         setUpClusterer();
-
-        // Add markers for each record in the database
-        for(int i = 0; i < parksJson.length(); i++) {
-            try {
-                double lon = ((JSONObject)parksJson.get(i)).getDouble("long");
-                double lat = ((JSONObject)parksJson.get(i)).getDouble("lat");
-                int id = ((JSONObject)parksJson.get(i)).getInt("id");
-                int items = ((JSONObject)parksJson.get(i)).getInt("nb_items");
-                String name = ((JSONObject)parksJson.get(i)).getString("name");
-                String address = ((JSONObject)parksJson.get(i)).getString("address");
-                // String geocode_address = ((JSONObject)parksJson.get(i)).getString("geocode_address");
-
-                LatLng location = new LatLng(lat, lon);
-                MarkerOptions marker = new MarkerOptions()
-                        .position(location)
-                        .title(name)
-                        .snippet(address).visible(false);
-
-                Marker m = mMap.addMarker(marker);
-                PlaygroundMarker pm = new PlaygroundMarker(lat, lon, name, items);
-                mClusterManager.addItem(pm);
-
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-                mMarkers.put(m, id);
-                mPlaygroundMarkers.put(pm, id);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            //http://stackoverflow.com/questions/30958224/android-maps-utils-clustering-show-infowindow
-            mMap.setOnInfoWindowClickListener(mClusterManager);
-            mClusterManager.setOnClusterItemInfoWindowClickListener(this);
-            mClusterManager.setOnClusterClickListener(this);
-
-
-        }
-
-        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-
-            @Override
-            public View getInfoWindow(Marker arg0) {
-                return null;
-            }
-
-            @Override
-            public View getInfoContents(Marker marker) {
-
-                LinearLayout info = new LinearLayout(getContext());
-                info.setOrientation(LinearLayout.VERTICAL);
-
-                TextView title = new TextView(getContext());
-                title.setTextColor(Color.BLACK);
-                title.setGravity(Gravity.CENTER);
-                title.setTypeface(null, Typeface.BOLD);
-                title.setText(marker.getTitle());
-
-                TextView snippet = new TextView(getContext());
-                snippet.setTextColor(Color.GRAY);
-                snippet.setText(marker.getSnippet());
-
-                info.addView(title);
-                info.addView(snippet);
-
-                return info;
-            }
-        });
+        displayMarkers();
 
         // set UI interface of the map
         mUiSettings.setZoomControlsEnabled(true);
@@ -246,13 +184,78 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         return mMap;
     }
 
-    private void setUpClusterer() {
+    public ClusterManager<PlaygroundMarker> getClusterManager() {
+        return mClusterManager;
+    }
 
+    public void displayMarkers() {
+
+        MapDrawerActivity drawer = (MapDrawerActivity) getActivity();
+        JSONArray parksJson = drawer.parksJson;
+
+        // Add markers for each record in the database
+        for(int i = 0; i < parksJson.length(); i++) {
+            try {
+                double lon = ((JSONObject)parksJson.get(i)).getDouble("long");
+                double lat = ((JSONObject)parksJson.get(i)).getDouble("lat");
+                int id = ((JSONObject)parksJson.get(i)).getInt("id");
+                int items = ((JSONObject)parksJson.get(i)).getInt("nb_items");
+                String name = ((JSONObject)parksJson.get(i)).getString("name");
+                String address = ((JSONObject)parksJson.get(i)).getString("address");
+
+                LatLng location = new LatLng(lat, lon);
+                MarkerOptions marker = new MarkerOptions()
+                        .position(location)
+                        .title(name)
+                        .snippet(address).visible(false);
+
+                Marker m = mMap.addMarker(marker);
+                PlaygroundMarker pm = new PlaygroundMarker(lat, lon, name, items);
+                mClusterManager.addItem(pm);
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+                mMarkers.put(m, id);
+                mPlaygroundMarkers.put(pm, id);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            //http://stackoverflow.com/questions/30958224/android-maps-utils-clustering-show-infowindow
+            mMap.setOnInfoWindowClickListener(mClusterManager);
+            mClusterManager.setOnClusterItemInfoWindowClickListener(this);
+            mClusterManager.setOnClusterClickListener(this);
+        }
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                LinearLayout info = new LinearLayout(getContext());
+                info.setOrientation(LinearLayout.VERTICAL);
+                TextView title = new TextView(getContext());
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+                TextView snippet = new TextView(getContext());
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+                info.addView(title);
+                info.addView(snippet);
+                return info;
+            }
+        });
+    }
+
+    private void setUpClusterer() {
         mClusterManager = new ClusterManager<PlaygroundMarker>(this.getContext(), getMyMap());
         mClusterManager.setRenderer(new PlaygroundIconRender(this.getContext(), mMap, mClusterManager));
         getMyMap().setOnCameraChangeListener(mClusterManager);
-
-
     }
 
     @Override

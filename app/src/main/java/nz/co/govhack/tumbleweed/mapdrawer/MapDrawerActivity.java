@@ -1,5 +1,9 @@
 package nz.co.govhack.tumbleweed.mapdrawer;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -8,18 +12,49 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID;
 import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
+
+
+import com.google.maps.android.clustering.ClusterManager;
 
 public class MapDrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
+    private JSONArray allParksJson;
+    public JSONArray parksJson;
+
+    private ArrayList<String> favoriteParks;
+    String installationId = "";
+    MapsFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +63,6 @@ public class MapDrawerActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -45,6 +72,21 @@ public class MapDrawerActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // load the map fragment
+        fragment = (MapsFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+
+        // load stuff required for filtering --> the installation id and the parks
+        installationId = Installation.id(getApplicationContext());
+
+        String json = Utils.loadJSONFromAsset(this.getApplicationContext().getAssets());
+        try {
+            allParksJson = new JSONArray(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        parksJson = allParksJson;
 
     }
 
@@ -72,7 +114,7 @@ public class MapDrawerActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        MapsFragment fragment = (MapsFragment)getSupportFragmentManager().findFragmentById(R.id.map);
+        //fragment = (MapsFragment)getSupportFragmentManager().findFragmentById(R.id.map);
         mMap = fragment.getMyMap();
 
         if (mMap == null) {
@@ -98,9 +140,19 @@ public class MapDrawerActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_playgrounds) {
-            // Handle the playgrounds action
+            getFavoritesPlaygrounds();
         } else if (id == R.id.nav_local_parks) {
-            Log.i("Stefan", "------> Local Parks button pressed");
+            parksJson = new JSONArray();
+            for(int i = 0; i < allParksJson.length(); i++) {
+                try {
+                    String name = ((JSONObject) allParksJson.get(i)).getString("name");
+                    parksJson.put((JSONObject) allParksJson.get(i));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            fragment.getMyMap().clear();
+            fragment.onMapReady(fragment.getMyMap());
         } else if (id == R.id.nav_premier_parks) {
 
         } else if (id == R.id.nav_regional_parks) {
@@ -115,4 +167,66 @@ public class MapDrawerActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+    /* Endpoint Calls functions */
+
+
+    private void getFavoritesPlaygrounds() { // might be better to look for the favorite at start to avoid the runin call
+        OkHttpClient client = new OkHttpClient();
+        String url = getResources().getString(R.string.get_favorite_url);
+        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).get().build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("****", "Failed to get favorites playgrounds", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String jsonData = response.body().string();
+                    JSONObject Jobject = new JSONObject(jsonData);
+                    JSONArray playgrounds = Jobject.getJSONArray("playground_name_list");
+                    favoriteParks = new ArrayList<String>();
+                    if (playgrounds != null) {
+                        for (int i=0; i<  playgrounds.length(); i++){
+                            favoriteParks.add(playgrounds.get(i).toString());
+                        }
+                    }
+
+                    parksJson = new JSONArray();
+                    for(int i = 0; i < allParksJson.length(); i++) {
+                        try {
+                            String name = ((JSONObject) allParksJson.get(i)).getString("name");
+                            if(favoriteParks.contains(name)) parksJson.put((JSONObject) allParksJson.get(i));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    Log.i("****", "Favorite Playgrounds filtering failed", e);
+                } catch (IOException e) {
+                    Log.i("****", "Favorite Playgrounds filtering failed", e);
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fragment.getMyMap().clear();
+                        fragment.onMapReady(fragment.getMyMap());
+                    }
+                });
+
+                Log.i("****", "The Http response is: " + response.toString());
+            }
+        });
+    }
+
+
+
 }
+
+
+
+
