@@ -77,6 +77,16 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
         });
 
+        FloatingActionButton visited = (FloatingActionButton) findViewById(R.id.visited);
+        visited.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerFavorite();
+                Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
         String json = Utils.loadJSONFromAsset(getAssets());
 
         try {
