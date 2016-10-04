@@ -4,6 +4,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="send_to">Share app using...</string>
     <string name="action_search">Search</string>
     <string name="action_map_type_normal">Map</string>
     <string name="action_map_type_hybrid">Satellite</string>

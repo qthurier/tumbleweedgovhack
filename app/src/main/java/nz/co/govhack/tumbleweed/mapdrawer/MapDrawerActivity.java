@@ -2,8 +2,10 @@ package nz.co.govhack.tumbleweed.mapdrawer;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -158,14 +160,29 @@ public class MapDrawerActivity extends AppCompatActivity
         } else if (id == R.id.nav_regional_parks) {
 
         } else if (id == R.id.nav_share) {
+            shareApp();
 
         } else if (id == R.id.nav_send) {
-
+            openPlayStore();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void shareApp() {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "Check out the Kiwi Playground app! http://bit.ly/kiwi-playgrounds");
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.send_to)));
+    }
+
+    private void openPlayStore() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("market://details?id=nz.co.govhack.tumbleweed.mapdrawer"));
+        startActivity(intent);
     }
 
 
