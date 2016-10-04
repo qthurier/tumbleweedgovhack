@@ -125,11 +125,15 @@ class StoreClick(webapp2.RequestHandler):
             longitude=float(longitude)).put()
       self.response.status = 200
 
+
+#########
+
 class Favorites(ndb.Model):
     """A model to store the list of favorite playgrounds per installation_id"""
     installation_id = ndb.StringProperty()
     record_id_list = ndb.IntegerProperty(repeated=True)
     playground_name_list = ndb.StringProperty(repeated=True)
+
                                            
 class FavoriteEndpoint(webapp2.RequestHandler):
 
@@ -166,10 +170,49 @@ class FavoriteEndpoint(webapp2.RequestHandler):
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))
 
+#############
+
+class Visited(ndb.Model):
+    """A model to store the list of visited playgrounds per installation_id"""
+    installation_id = ndb.StringProperty()
+    record_id_list = ndb.IntegerProperty(repeated=True)
+    playground_name_list = ndb.StringProperty(repeated=True)
+
+class VisitedEndpoint(webapp2.RequestHandler):
+
+    """register a visited playground"""
+    def post(self):
+      installation_id = self.request.POST.get('installation_id')
+      record_id = self.request.POST.get('record_id')
+      playground_name = self.request.POST.get('playground_name')
+      visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
+      if len(visited) > 0 :
+        if playground_name not in visited[0].playground_name_list:
+          visited[0].record_id_list.append(int(record_id))
+          visited[0].playground_name_list.append(playground_name)
+          visited[0].put()
+      else:
+        Visited(installation_id=installation_id, 
+                  record_id_list=[int(record_id)], 
+                  playground_name_list=[playground_name]).put()
+      self.response.status = 200   
+
+    """get a list of favorite playgrounds"""
+    def get(self):
+      installation_id = self.request.get('installation_id')
+      visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
+      if len(visited) > 0 :
+        body = {'record_id_list': visited[0].record_id_list, 'playground_name_list': visited[0].playground_name_list}
+      else:
+         body = {'record_id_list': [], 'playground_name_list': []}
+      self.response.status = 200
+      self.response.headers['Content-Type'] = 'application/json'   
+      self.response.out.write(json.dumps(body))
 
 APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/rating', RatingEndpoint),
-                                       ('/favorite', FavoriteEndpoint)], debug=True)
+                                       ('/favorite', FavoriteEndpoint),
+                                       ('/visited', VisitedEndpoint)], debug=True)
 
 
 
