@@ -81,7 +81,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         visited.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                registerFavorite();
+                //registerVisited();
                 Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
