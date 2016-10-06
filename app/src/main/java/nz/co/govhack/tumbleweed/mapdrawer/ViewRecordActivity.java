@@ -1,7 +1,9 @@
 package nz.co.govhack.tumbleweed.mapdrawer;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -124,12 +126,18 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 lat = mRecord.getString("lat");
                 lon = mRecord.getString("long");
 
+                FloatingActionButton share = (FloatingActionButton) findViewById(R.id.share_playground);
+                visited.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        sharePlayground();
+                    }
+                });
 
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.i("****", "Json error here", e);
             }
-
         }
 
         // add background image
@@ -157,6 +165,14 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         updateInstallationRating();
 
     }
+
+    private void sharePlayground() {
+        Uri gmmIntentUri = Uri.parse("geo:" + lat + "," + lon);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        startActivity(mapIntent);
+    }
+
 
     private class PictureLoader extends AsyncTask<String, Void, Bitmap> {
         @Override
