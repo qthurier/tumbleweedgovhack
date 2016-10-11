@@ -166,13 +166,33 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
     }
 
-    private void sharePlayground() {
+    private void openInGoogleMaps() {
         Uri gmmIntentUri = Uri.parse("geo:" + lat + "," + lon);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
         startActivity(mapIntent);
     }
 
+    private void sharePlayground() {
+        // prepare URL to google maps
+        DecimalFormat df = new DecimalFormat("#.####");
+        String uri = "https://www.google.com/maps/place//@" +
+                df.format(Double.parseDouble(lat)) + "," +  // lat and lon rounded to 4 digits
+                df.format(Double.parseDouble(lon)) +
+                ",15z";                                     // zoom level in the map
+
+        // prepare subject and body of the share
+        String shareSubject = "Playground " + playgroundName;
+        String shareText = uri + "\nShared via Kiwi Playground";
+
+        // create share intent with the prepared data
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+        startActivity(Intent.createChooser(sharingIntent,
+                getResources().getText(R.string.send_to)));
+    }
 
     private class PictureLoader extends AsyncTask<String, Void, Bitmap> {
         @Override
