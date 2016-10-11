@@ -216,7 +216,7 @@ class TopEndpoint(webapp2.RequestHandler):
     """get the list of favorite playgrounds"""
     def get(self):
       top = self.request.get('top')
-      playgrounds = Playground.query().order(-Playground.rating).fetch(int(top))
+      playgrounds = Playground.query(Playground.rating > 0).order(-Playground.rating).fetch(int(top))
       if len(playgrounds) > 0 :
         playground_name_list = [playground.name for playground in playgrounds]
         body = {'playground_name_list': playground_name_list}
