@@ -11,7 +11,9 @@
     <string name="title_activity_maps">Map</string>
     <string name="store_click_url">https://govhacktumbleweed.appspot.com/store_click</string>
     <string name="register_favorite_url">https://govhacktumbleweed.appspot.com/favorite</string>
+    <string name="register_visited_url">https://govhacktumbleweed.appspot.com/visited</string>
     <string name="get_favorite_url">https://govhacktumbleweed.appspot.com/favorite</string>
+    <string name="get_visited_url">https://govhacktumbleweed.appspot.com/visited</string>
     <string name="rating_url">https://govhacktumbleweed.appspot.com/rating</string>
 
 

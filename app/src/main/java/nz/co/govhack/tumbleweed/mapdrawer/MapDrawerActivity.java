@@ -141,9 +141,9 @@ public class MapDrawerActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_playgrounds) {
+        if (id == R.id.favorite_playgrounds) {
             getFavoritesPlaygrounds();
-        } else if (id == R.id.nav_local_parks) {
+        } else if (id == R.id.all_playgrounds) {
             parksJson = new JSONArray();
             for(int i = 0; i < allParksJson.length(); i++) {
                 try {
@@ -155,9 +155,9 @@ public class MapDrawerActivity extends AppCompatActivity
             }
             fragment.getMyMap().clear();
             fragment.onMapReady(fragment.getMyMap());
-        } else if (id == R.id.nav_premier_parks) {
-
-        } else if (id == R.id.nav_regional_parks) {
+        } else if (id == R.id.visited_playgrounds) {
+            getVisitedPlaygrounds();
+        } else if (id == R.id.top_playgrounds) {
 
         } else if (id == R.id.nav_share) {
             shareApp();
@@ -240,7 +240,56 @@ public class MapDrawerActivity extends AppCompatActivity
         });
     }
 
+    private void getVisitedPlaygrounds() { // might be better to look for the favorite at start to avoid the runin call
+        OkHttpClient client = new OkHttpClient();
+        String url = getResources().getString(R.string.get_visited_url);
+        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).get().build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("****", "Failed to get visited playgrounds", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String jsonData = response.body().string();
+                    JSONObject Jobject = new JSONObject(jsonData);
+                    JSONArray playgrounds = Jobject.getJSONArray("playground_name_list");
+                    favoriteParks = new ArrayList<String>();
+                    if (playgrounds != null) {
+                        for (int i=0; i<  playgrounds.length(); i++){
+                            favoriteParks.add(playgrounds.get(i).toString());
+                        }
+                    }
 
+                    parksJson = new JSONArray();
+                    for(int i = 0; i < allParksJson.length(); i++) {
+                        try {
+                            String name = ((JSONObject) allParksJson.get(i)).getString("name");
+                            if(favoriteParks.contains(name)) parksJson.put((JSONObject) allParksJson.get(i));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    Log.i("****", "Visited Playgrounds filtering failed", e);
+                } catch (IOException e) {
+                    Log.i("****", "Visited Playgrounds filtering failed", e);
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fragment.getMyMap().clear();
+                        fragment.onMapReady(fragment.getMyMap());
+                    }
+                });
+
+                Log.i("****", "The Http response is: " + response.toString());
+            }
+        });
+    }
 
 }
 

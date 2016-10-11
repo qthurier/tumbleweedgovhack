@@ -83,7 +83,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         visited.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //registerVisited();
+                registerVisit();
                 Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -127,7 +127,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 lon = mRecord.getString("long");
 
                 FloatingActionButton share = (FloatingActionButton) findViewById(R.id.share_playground);
-                visited.setOnClickListener(new View.OnClickListener() {
+                share.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         sharePlayground();
@@ -374,6 +374,32 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             public void onResponse(Call call, Response response) throws IOException {
                 updateGlobalRating();
                 Log.i("****", "Favorite has been registered");
+                Log.i("****", "The Http response is: " + response.toString());
+            }
+        });
+    }
+
+    private void registerVisit() {
+        OkHttpClient client = new OkHttpClient();
+        String url = getResources().getString(R.string.register_visited_url);
+        FormBody formBody = new FormBody.Builder()
+                .add("installation_id", installationId)
+                .add("record_id", recordId)
+                .add("playground_name", playgroundName)
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("****", "Failed to register visit", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                updateGlobalRating();
+                Log.i("****", "Visit has been registered");
                 Log.i("****", "The Http response is: " + response.toString());
             }
         });

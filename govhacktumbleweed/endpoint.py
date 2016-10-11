@@ -200,7 +200,7 @@ class VisitedEndpoint(webapp2.RequestHandler):
     """get a list of favorite playgrounds"""
     def get(self):
       installation_id = self.request.get('installation_id')
-      visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
+      playgrounds = Playground.query(Visited.installation_id == installation_id).fetch(1)
       if len(visited) > 0 :
         body = {'record_id_list': visited[0].record_id_list, 'playground_name_list': visited[0].playground_name_list}
       else:
@@ -209,10 +209,29 @@ class VisitedEndpoint(webapp2.RequestHandler):
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))
 
+##############
+
+class TopEndpoint(webapp2.RequestHandler):
+
+    """get the list of favorite playgrounds"""
+    def get(self):
+      installation_id = self.request.get('installation_id')
+      visited = Playground.query(Visited.installation_id == installation_id).fetch(1)
+      if len(visited) > 0 :
+        body = {'record_id_list': visited[0].record_id_list, 'playground_name_list': visited[0].playground_name_list}
+      else:
+         body = {'record_id_list': [], 'playground_name_list': []}
+      self.response.status = 200
+      self.response.headers['Content-Type'] = 'application/json'   
+      self.response.out.write(json.dumps(body))
+
+
+
 APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/rating', RatingEndpoint),
                                        ('/favorite', FavoriteEndpoint),
-                                       ('/visited', VisitedEndpoint)], debug=True)
+                                       ('/visited', VisitedEndpoint),
+                                       ('/top', TopEndpoint)], debug=True)
 
 
 
