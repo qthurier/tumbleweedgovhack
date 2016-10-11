@@ -200,7 +200,7 @@ class VisitedEndpoint(webapp2.RequestHandler):
     """get a list of favorite playgrounds"""
     def get(self):
       installation_id = self.request.get('installation_id')
-      playgrounds = Playground.query(Visited.installation_id == installation_id).fetch(1)
+      visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
       if len(visited) > 0 :
         body = {'record_id_list': visited[0].record_id_list, 'playground_name_list': visited[0].playground_name_list}
       else:
@@ -215,12 +215,13 @@ class TopEndpoint(webapp2.RequestHandler):
 
     """get the list of favorite playgrounds"""
     def get(self):
-      installation_id = self.request.get('installation_id')
-      visited = Playground.query(Visited.installation_id == installation_id).fetch(1)
-      if len(visited) > 0 :
-        body = {'record_id_list': visited[0].record_id_list, 'playground_name_list': visited[0].playground_name_list}
+      top = self.request.get('top')
+      playgrounds = Playground.query(Playground.rating > 0).order(-Playground.rating).fetch(int(top))
+      if len(playgrounds) > 0 :
+        playground_name_list = [playground.name for playground in playgrounds]
+        body = {'playground_name_list': playground_name_list}
       else:
-         body = {'record_id_list': [], 'playground_name_list': []}
+         body = {'playground_name_list': []}
       self.response.status = 200
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))
