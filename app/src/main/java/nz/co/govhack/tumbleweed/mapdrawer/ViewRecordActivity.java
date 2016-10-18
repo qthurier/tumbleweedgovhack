@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -48,8 +49,13 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     private RatingBar setRatingBar;
     private TextView countText;
     private int count;
+    private Boolean isFavorite;
+    private Boolean isVisited;
     private float curRate;
     private float globalRate;
+
+    FloatingActionButton fab;
+    FloatingActionButton visited;
 
     String installationId = "";
     String recordId = "";
@@ -69,25 +75,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         imageView = (ImageView) findViewById(R.id.background_image);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_view);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                registerFavorite();
-                Snackbar.make(view, "This playground has been added to your favorites", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        FloatingActionButton visited = (FloatingActionButton) findViewById(R.id.visited);
-        visited.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                registerVisit();
-                Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        visited = (FloatingActionButton) findViewById(R.id.visited);
 
         String json = Utils.loadJSONFromAsset(getAssets());
 
@@ -163,6 +152,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         recordClick();
         updateGlobalRating();
         updateInstallationRating();
+        checkIfFavorite();
+        checkIfVisited();
 
     }
 
@@ -397,6 +388,27 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 Log.i("****", "The Http response is: " + response.toString());
             }
         });
+        isFavorite = true;
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                unRegisterFavorite();
+                Snackbar.make(view, "This playground is not a favorite anymore", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+    }
+
+    private void unRegisterFavorite(){
+        isFavorite = false;
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerFavorite();
+                Snackbar.make(view, "This playground has been added to your favorites", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
     }
 
     private void registerVisit() {
@@ -421,6 +433,27 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 updateGlobalRating();
                 Log.i("****", "Visit has been registered");
                 Log.i("****", "The Http response is: " + response.toString());
+            }
+        });
+        isVisited = true;
+        visited.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                unRegisterVisit();
+                Snackbar.make(view, "Your visit in this playground has been removed", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+    }
+
+    private void unRegisterVisit() {
+        isVisited = false;
+        visited.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerVisit();
+                Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         });
     }
@@ -451,6 +484,100 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
         });
     }
+
+    private void checkIfFavorite() {
+        OkHttpClient client = new OkHttpClient();
+        String url = getResources().getString(R.string.check_favorite);
+        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("****", "Failed to check if it is favorite", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String jsonData = response.body().string();
+                    JSONObject Jobject = new JSONObject(jsonData);
+                    isFavorite = (Boolean) Jobject.getBoolean("check");
+                } catch (JSONException e) {
+                    Log.i("****", "Favorite check failed", e);
+                } catch (IOException e) {
+                    Log.i("****", "Favorite check failed", e);
+                }
+                if(isFavorite == false) {
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            registerFavorite();
+                            Snackbar.make(view, "This playground has been added to your favorites", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+                } else {
+                    fab.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            unRegisterFavorite();
+                            Snackbar.make(view, "This playground is not a favorite anymore", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+                }
+                Log.i("**** check if favorite", "The Http response is: " + response.toString());
+                Log.i("**** check if favorite", isFavorite.toString());
+
+            }
+        });
+    }
+
+    private void checkIfVisited() {
+        OkHttpClient client = new OkHttpClient();
+        String url = getResources().getString(R.string.check_visited);
+        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("****", "Failed to check if it has been visited", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String jsonData = response.body().string();
+                    JSONObject Jobject = new JSONObject(jsonData);
+                    isVisited = (Boolean) Jobject.getBoolean("check");
+                } catch (JSONException e) {
+                    Log.i("****", "Visited check failed", e);
+                } catch (IOException e) {
+                    Log.i("****", "Visited check failed", e);
+                }
+
+                if(isVisited == false) {
+                    visited.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            registerVisit();
+                            Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+                } else {
+                    visited.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            unRegisterVisit();
+                            Snackbar.make(view, "Your visit in this playground has been removed", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    });
+                }
+
+                Log.i("**** check if visited", "The Http response is: " + response.toString());
+                Log.i("**** check if visited", isVisited.toString());
+            }
+        });
+    }
+
 
     @Override
     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {

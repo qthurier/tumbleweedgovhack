@@ -170,6 +170,23 @@ class FavoriteEndpoint(webapp2.RequestHandler):
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))
 
+
+class CheckFavoriteEndpoint(webapp2.RequestHandler):
+
+    """check if a playground belongs to the favorite"""
+    def get(self):
+      installation_id = self.request.get('installation_id')
+      playground_name = self.request.get('playground_name')
+      favorites = Favorites.query(ndb.AND(Favorites.installation_id == installation_id, 
+                                          Favorites.playground_name_list.IN([playground_name]))).fetch(1)
+      if len(favorites) > 0 :
+        body = {'check': True}
+      else:
+         body = {'check': False}
+      self.response.status = 200
+      self.response.headers['Content-Type'] = 'application/json'   
+      self.response.out.write(json.dumps(body))
+
 #############
 
 class Visited(ndb.Model):
@@ -209,6 +226,22 @@ class VisitedEndpoint(webapp2.RequestHandler):
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))
 
+class CheckVisitedEndpoint(webapp2.RequestHandler):
+
+    """check if a playground has been visited"""
+    def get(self):
+      installation_id = self.request.get('installation_id')
+      playground_name = self.request.get('playground_name')
+      visited = Visited.query(ndb.AND(Visited.installation_id == installation_id, 
+                                      Visited.playground_name_list.IN([playground_name]))).fetch(1)
+      if len(visited) > 0 :
+        body = {'check': True}
+      else:
+         body = {'check': False}
+      self.response.status = 200
+      self.response.headers['Content-Type'] = 'application/json'   
+      self.response.out.write(json.dumps(body))
+
 ##############
 
 class TopEndpoint(webapp2.RequestHandler):
@@ -232,6 +265,8 @@ APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/rating', RatingEndpoint),
                                        ('/favorite', FavoriteEndpoint),
                                        ('/visited', VisitedEndpoint),
+                                       ('/check_favorite', CheckFavoriteEndpoint),
+                                       ('/check_visited', CheckVisitedEndpoint),
                                        ('/top', TopEndpoint)], debug=True)
 
 
