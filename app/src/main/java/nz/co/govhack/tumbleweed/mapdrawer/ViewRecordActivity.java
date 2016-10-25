@@ -1,5 +1,6 @@
 package nz.co.govhack.tumbleweed.mapdrawer;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -53,6 +55,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     private Boolean isVisited;
     private float curRate;
     private float globalRate;
+
+    private Dialog rankDialog;
 
     FloatingActionButton fab;
     FloatingActionButton visited;
@@ -140,7 +144,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
         findViewsById();
 
-        getRatingBar.setOnRatingBarChangeListener(this);
+//        getRatingBar.setOnRatingBarChangeListener(this);
 
         /*
         RecordClick record = new RecordClick();
@@ -151,9 +155,36 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
         recordClick();
         updateGlobalRating();
-        updateInstallationRating();
+//        updateInstallationRating();
         checkIfFavorite();
         checkIfVisited();
+
+        // ranking dialog
+        Button rankBtn = (Button) findViewById(R.id.rank_dialog_button);
+        rankBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                rankDialog = new Dialog(ViewRecordActivity.this);
+                rankDialog.setContentView(R.layout.rank_dialog);
+                rankDialog.setCancelable(true);
+                getRatingBar = (RatingBar)rankDialog.findViewById(R.id.dialog_ratingbar);
+
+                updateInstallationRating();
+                getRatingBar.setOnRatingBarChangeListener(ViewRecordActivity.this);
+
+                TextView text = (TextView) rankDialog.findViewById(R.id.rank_dialog_text1);
+                text.setText("Test");
+
+                Button updateButton = (Button) rankDialog.findViewById(R.id.rank_dialog_button);
+                updateButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        rankDialog.dismiss();
+                    }
+                });
+                //now that the dialog is set up, it's time to show it
+                rankDialog.show();
+            }
+        });
 
     }
 
@@ -244,7 +275,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
 
     private void findViewsById() {
-        getRatingBar = (RatingBar) findViewById(R.id.getRating);
+        // getRatingBar = (RatingBar) findViewById(R.id.getRating);
         setRatingBar = (RatingBar) findViewById(R.id.setRating);
         countText = (TextView) findViewById(R.id.countText);
     }
