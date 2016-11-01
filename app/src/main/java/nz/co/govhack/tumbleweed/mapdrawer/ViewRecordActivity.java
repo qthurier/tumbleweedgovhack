@@ -116,8 +116,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 setSupportActionBar(toolbar);
 
                 String details = "<h2>Address</h2>" +
-                        "<p>" + mRecord.getString("address") + "</p>" +
-                        "<h2>Equipement</h2>" +
+                        "<p>" + mRecord.getString("name") + "<br>" + mRecord.getString("address") + "</p>" +
+                        "<h2>Equipment</h2>" +
                         "<p>" + mRecord.getString("equipment") + "</p>";
 
                 String facilities = mRecord.getString("facilities");
@@ -338,7 +338,13 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     @Override
                     public void run() {
                         setRatingBar.setRating((int) globalRate);
-                        countText.setText(count + " user ratings");
+                        if(count == 0) {
+                            countText.setText("No user rating yet");
+                        } else if(count == 1) {
+                            countText.setText("1 user rating");
+                        } else {
+                            countText.setText(count + " user ratings");
+                        }
                     }
                 });
                 Log.i("****", "Rating has been updated");
