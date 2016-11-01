@@ -175,8 +175,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         checkIfVisited();
 
 
-        //in the toolbar
-
         // ranking dialog
         Button rankBtn = (Button) findViewById(R.id.rank_dialog_button);
         rankBtn.setOnClickListener(new View.OnClickListener() {
@@ -188,9 +186,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
                 updateInstallationRating();
                 getRatingBar.setOnRatingBarChangeListener(ViewRecordActivity.this);
-
-                TextView text = (TextView) rankDialog.findViewById(R.id.rank_dialog_text1);
-                text.setText("Test");
 
                 Button updateButton = (Button) rankDialog.findViewById(R.id.rank_dialog_button);
                 updateButton.setOnClickListener(new View.OnClickListener() {
