@@ -38,17 +38,21 @@
                 android:layout_height="44dp"
                 app:layout_collapseMode="pin"
                 android:background="#ffffff"
+                android:alpha="0.5"
                 app:popupTheme="@style/AppTheme.PopupOverlay" >
 
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:orientation="horizontal"
-                android:layout_height="fill_parent" >
+                android:layout_height="fill_parent"
+                android:layout_gravity="right">
 
             <com.github.ivbaranov.mfb.MaterialFavoriteButton
                 android:id="@+id/heart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_margin="0dp"
                 android:layout_weight="1"
                 app:mfb_rotation_duration="400"
                 app:mfb_rotation_angle="360"
@@ -58,6 +62,7 @@
                 android:id="@+id/check"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="0dp"
                 android:layout_weight="1"
                 app:mfb_rotation_duration="400"
                 app:mfb_rotation_angle="360"
@@ -66,6 +71,24 @@
                 app:mfb_not_favorite_image="@drawable/ic_check_box_outline_blank_black_24dp"
                 app:layout_anchor="@id/heart"
                 app:layout_anchorGravity="right"/>
+
+                <ImageButton android:id="@+id/rank_dialog_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_grade_black_24dp"
+                    android:background="@null"
+                    app:layout_anchor="@id/check"
+                    app:layout_anchorGravity="right"/>
+
+                <ImageButton android:id="@+id/foo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_menu_share"
+                    android:background="@null"
+                    app:layout_anchor="@id/rank_dialog_button"
+                    app:layout_anchorGravity="right"/>
 
             </LinearLayout>
         </android.support.v7.widget.Toolbar>

@@ -17,6 +17,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -60,9 +61,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
     private Dialog rankDialog;
 
-    FloatingActionButton fab;
-    FloatingActionButton visited;
-
     MaterialFavoriteButton toolbarFavorite;
     MaterialFavoriteButton toolbarVisited;
 
@@ -93,10 +91,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
         toolbarVisited = (MaterialFavoriteButton) findViewById(R.id.check);
         toolbarVisited.setFavorite(false);
-
-
-        //toolbar.addView(toolbarFavorite);
-        //toolbar.addView(toolbarVisited);
 
         String json = Utils.loadJSONFromAsset(getAssets());
 
@@ -177,7 +171,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
 
         // ranking dialog
-        Button rankBtn = (Button) findViewById(R.id.rank_dialog_button);
+        //Button rankBtn = (Button) findViewById(R.id.rank_dialog_button);
+        ImageButton rankBtn = (ImageButton) findViewById(R.id.rank_dialog_button);
         rankBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 rankDialog = new Dialog(ViewRecordActivity.this);
@@ -440,14 +435,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
         });
         isFavorite = true;
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                unRegisterFavorite();
-                Snackbar.make(view, "This playground is not a favorite anymore", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private void unRegisterFavorite(){
@@ -479,26 +466,10 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
         });
         isVisited = true;
-        visited.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                unRegisterVisit();
-                Snackbar.make(view, "Your visit in this playground has been removed", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private void unRegisterVisit() {
         isVisited = false;
-        visited.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                registerVisit();
-                Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private void recordClick() {
@@ -641,56 +612,5 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         }
     }
 
-    private class RecordClick extends AsyncTask<Void, Integer, Void>
-    {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            recordClick();
-            return null;
-        }
-
-    }
-
-    private class UpdateRating extends AsyncTask<Void, Integer, Void>
-    {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            updateGlobalRating();
-            return null;
-        }
-
-    }
-
-    private class PostRating extends AsyncTask<Void, Integer, Void>
-    {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            postRating();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            Toast.makeText(getApplicationContext(), "Thanks !", Toast.LENGTH_LONG).show();
-        }
-    }
 
 }
