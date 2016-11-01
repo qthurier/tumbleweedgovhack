@@ -64,6 +64,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     FloatingActionButton visited;
 
     MaterialFavoriteButton toolbarFavorite;
+    MaterialFavoriteButton toolbarVisited;
 
     String installationId = "";
     String recordId = "";
@@ -88,15 +89,21 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
         // favoriteButton.setFavorite(isFavorite(data.get(position)), false);
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        visited = (FloatingActionButton) findViewById(R.id.visited);
-        toolbarFavorite = new MaterialFavoriteButton.Builder(this)
-                .favorite(false)
-                .color(MaterialFavoriteButton.STYLE_WHITE)
-                .type(MaterialFavoriteButton.STYLE_HEART)
-                .create();
+        //fab = (FloatingActionButton) findViewById(R.id.fab);
+        //visited = (FloatingActionButton) findViewById(R.id.visited);
 
-        toolbar.addView(toolbarFavorite);
+        toolbarFavorite = (MaterialFavoriteButton) findViewById(R.id.heart);
+        toolbarFavorite.setFavorite(false);
+        toolbarFavorite.setColor(MaterialFavoriteButton.STYLE_BLACK);
+        toolbarFavorite.setType(MaterialFavoriteButton.STYLE_HEART);
+
+        toolbarVisited = (MaterialFavoriteButton) findViewById(R.id.check);
+        toolbarVisited.setFavorite(false);
+
+
+        //toolbar.addView(toolbarFavorite);
+        //toolbar.addView(toolbarVisited);
+
         String json = Utils.loadJSONFromAsset(getAssets());
 
         try {
@@ -579,7 +586,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                 }
                         });
 
-
+                /*
                 if(isFavorite == false) {
                     fab.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -601,6 +608,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     });
                     toolbarFavorite.isFavorite();
                 }
+                */
                 Log.i("**** check if favorite", "The Http response is: " + response.toString());
                 Log.i("**** check if favorite", isFavorite.toString());
 
@@ -628,7 +636,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 } catch (IOException e) {
                     Log.i("****", "Visited check failed", e);
                 }
-
+                /*
                 if(isVisited == false) {
                     visited.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -647,7 +655,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                     .setAction("Action", null).show();
                         }
                     });
-                }
+                } */
 
                 Log.i("**** check if visited", "The Http response is: " + response.toString());
                 Log.i("**** check if visited", isVisited.toString());
