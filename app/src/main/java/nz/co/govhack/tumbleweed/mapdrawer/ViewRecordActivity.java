@@ -86,12 +86,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_view);
         setSupportActionBar(toolbar);
 
-
-        // favoriteButton.setFavorite(isFavorite(data.get(position)), false);
-
-        //fab = (FloatingActionButton) findViewById(R.id.fab);
-        //visited = (FloatingActionButton) findViewById(R.id.visited);
-
         toolbarFavorite = (MaterialFavoriteButton) findViewById(R.id.heart);
         toolbarFavorite.setFavorite(false);
         toolbarFavorite.setColor(MaterialFavoriteButton.STYLE_BLACK);
@@ -452,14 +446,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
     private void unRegisterFavorite(){
         isFavorite = false;
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                registerFavorite();
-                Snackbar.make(view, "This playground has been added to your favorites", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private void registerVisit() {
@@ -581,29 +567,11 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                 }
                         });
 
-                /*
                 if(isFavorite == false) {
-                    fab.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            registerFavorite();
-                            Snackbar.make(view, "This playground has been added to your favorites", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });
 
                 } else {
-                    fab.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            unRegisterFavorite();
-                            Snackbar.make(view, "This playground is not a favorite anymore", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });
                     toolbarFavorite.isFavorite();
                 }
-                */
                 Log.i("**** check if favorite", "The Http response is: " + response.toString());
                 Log.i("**** check if favorite", isFavorite.toString());
 

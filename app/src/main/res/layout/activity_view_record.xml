@@ -35,9 +35,10 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar_view"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="44dp"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/AppTheme.PopupOverlay" /> <!-- android:background="?attr/colorPrimary" -->
+                android:background="#ffffff"
+                app:popupTheme="@style/AppTheme.PopupOverlay" >
 
             <LinearLayout
                 android:layout_width="fill_parent"
@@ -67,6 +68,7 @@
                 app:layout_anchorGravity="right"/>
 
             </LinearLayout>
+        </android.support.v7.widget.Toolbar>
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
@@ -97,46 +99,13 @@
 
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/share_playground"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_favorite_24dp" />
+        android:src="@drawable/ic_menu_share" />
 
-    <View
-        android:id="@+id/dummy"
-        android:layout_width="1dp"
-        android:layout_height="16dp"
-        app:layout_anchor="@id/fab"
-        app:layout_anchorGravity="top|right|end" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/visited"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|top"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_add_white_24dp"
-        app:layout_anchor="@id/dummy"
-        app:layout_anchorGravity="top|right|end" />
-
-    <View
-        android:id="@+id/dummy2"
-        android:layout_width="1dp"
-        android:layout_height="16dp"
-        app:layout_anchor="@id/visited"
-        app:layout_anchorGravity="top|right|end" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/share_playground"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|top"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_menu_share"
-        app:layout_anchor="@id/dummy2"
-        app:layout_anchorGravity="top|right|end" />
 
     <!--
     <com.github.ivbaranov.mfb.MaterialFavoriteButton
