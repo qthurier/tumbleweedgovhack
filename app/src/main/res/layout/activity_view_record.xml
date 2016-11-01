@@ -110,4 +110,20 @@
         app:layout_anchor="@id/dummy2"
         app:layout_anchorGravity="top|right|end" />
 
+    <!--
+    <com.github.ivbaranov.mfb.MaterialFavoriteButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:mfb_animate_favorite="true"
+        app:mfb_animate_unfavorite="false"
+        app:mfb_padding="12"
+        app:mfb_favorite_image="@drawable/ic_menu_share"
+        app:mfb_not_favorite_image="@drawable/ic_menu_share"
+        app:mfb_rotation_duration="400"
+        app:mfb_rotation_angle="360"
+        app:mfb_bounce_duration="300"
+        app:mfb_color="black"
+        app:mfb_type="star" />
+    -->
+
 </android.support.design.widget.CoordinatorLayout>

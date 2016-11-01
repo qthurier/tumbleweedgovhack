@@ -20,6 +20,8 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.ivbaranov.mfb.MaterialFavoriteButton;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +59,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     FloatingActionButton fab;
     FloatingActionButton visited;
 
+    MaterialFavoriteButton toolbarFavorite;
+
     String installationId = "";
     String recordId = "";
     String playgroundName = "";
@@ -66,6 +70,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     ImageView imageView = null;
 
     boolean initialisation = true;
+    boolean favoriteInit = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +79,20 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
         imageView = (ImageView) findViewById(R.id.background_image);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_view);
+        setSupportActionBar(toolbar);
+
+
+        // favoriteButton.setFavorite(isFavorite(data.get(position)), false);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
         visited = (FloatingActionButton) findViewById(R.id.visited);
+        toolbarFavorite = new MaterialFavoriteButton.Builder(this)
+                .favorite(false)
+                .color(MaterialFavoriteButton.STYLE_WHITE)
+                .type(MaterialFavoriteButton.STYLE_HEART)
+                .create();
 
+        toolbar.addView(toolbarFavorite);
         String json = Utils.loadJSONFromAsset(getAssets());
 
         try {
@@ -154,6 +169,9 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         updateInstallationRating();
         checkIfFavorite();
         checkIfVisited();
+
+        //in the toolbar
+
 
     }
 
@@ -505,6 +523,32 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 } catch (IOException e) {
                     Log.i("****", "Favorite check failed", e);
                 }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toolbarFavorite.setFavorite(isFavorite);
+                    }
+                });
+
+                toolbarFavorite.setOnFavoriteChangeListener(
+                        new MaterialFavoriteButton.OnFavoriteChangeListener() {
+                            @Override
+                            public void onFavoriteChanged(MaterialFavoriteButton buttonView, boolean favorite) {
+                                    if (toolbarFavorite.isFavorite()) {
+                                        if(favoriteInit == false) {
+                                            favoriteInit = false;
+                                            registerFavorite();
+                                            Snackbar.make(buttonView, "This playground has been added to your favorites", Snackbar.LENGTH_SHORT).show();
+                                        }
+                                    } else {
+                                        unRegisterFavorite();
+                                        Snackbar.make(buttonView, "This playground has been removed from your favorites", Snackbar.LENGTH_SHORT).show();
+                                    }
+                                }
+                        });
+
+
                 if(isFavorite == false) {
                     fab.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -514,6 +558,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                     .setAction("Action", null).show();
                         }
                     });
+
                 } else {
                     fab.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -523,6 +568,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                     .setAction("Action", null).show();
                         }
                     });
+                    toolbarFavorite.isFavorite();
                 }
                 Log.i("**** check if favorite", "The Http response is: " + response.toString());
                 Log.i("**** check if favorite", isFavorite.toString());
