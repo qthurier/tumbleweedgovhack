@@ -4,19 +4,19 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/all_playgrounds"
-            android:icon="@drawable/ic_my_location_24dp"
+            android:icon="@drawable/ic_mood_24dp"
             android:title="All Playgrounds" />
         <item
             android:id="@+id/favorite_playgrounds"
-            android:icon="@drawable/ic_mood_24dp"
+            android:icon="@drawable/ic_favorite_24dp"
             android:title="Favorite Playgrounds" />
         <item
             android:id="@+id/visited_playgrounds"
-            android:icon="@drawable/ic_satellite_24dp"
+            android:icon="@drawable/ic_check_box_black_24dp"
             android:title="Visited Playgrounds" />
         <item
             android:id="@+id/top_playgrounds"
-            android:icon="@drawable/ic_terrain_24dp"
+            android:icon="@drawable/ic_grade_black_24dp"
             android:title="Top ranked playgrounds" />
     </group>
 

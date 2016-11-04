@@ -10,13 +10,15 @@ public class PlaygroundMarker implements ClusterItem {
     private final LatLng mPosition;
     private String mName;
     private int mItems;
+    private String mAddress;
     private int threshold1 = 4;
     private int threshold2 = 8;
 
-    public PlaygroundMarker(double lat, double lng, String name, int items) {
+    public PlaygroundMarker(double lat, double lng, String name, int items, String address) {
         mPosition = new LatLng(lat, lng);
         mName = name;
         mItems = items;
+        mAddress = address;
     }
 
     @Override
@@ -36,7 +38,11 @@ public class PlaygroundMarker implements ClusterItem {
     }
 
     public String getSnippet() {
-        return "Playground properties";
+        if(mName.length() <= mAddress.length()) {
+            return mAddress.substring(0, mName.length()) + "...";
+        } else {
+            return mAddress;
+        }
     }
 
     public String getTitle() {

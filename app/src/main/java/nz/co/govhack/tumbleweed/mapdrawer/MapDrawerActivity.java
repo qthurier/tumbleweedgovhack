@@ -128,8 +128,6 @@ public class MapDrawerActivity extends AppCompatActivity
             mMap.setMapType(MAP_TYPE_NORMAL);
         } else if (id == R.id.action_map_type_hybrid) {
             mMap.setMapType(MAP_TYPE_HYBRID);
-        } else if (id == R.id.action_search) {
-            Log.i("stefan", "Search is not implemented yet");
         }
 
         return super.onOptionsItemSelected(item);

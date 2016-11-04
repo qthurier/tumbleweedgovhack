@@ -210,7 +210,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                         .snippet(address).visible(false);
 
                 Marker m = mMap.addMarker(marker);
-                PlaygroundMarker pm = new PlaygroundMarker(lat, lon, name, items);
+                PlaygroundMarker pm = new PlaygroundMarker(lat, lon, name.trim(), items, address.trim());
                 mClusterManager.addItem(pm);
 
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(location));

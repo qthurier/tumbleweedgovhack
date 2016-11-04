@@ -22,7 +22,7 @@ class PlaygroundIconRender extends DefaultClusterRenderer<PlaygroundMarker> {
     protected void onBeforeClusterItemRendered(PlaygroundMarker item, MarkerOptions markerOptions) {
         // Draw a single playground
         markerOptions.icon(item.getIcon());
-        //markerOptions.snippet(item.getSnippet());
+        markerOptions.snippet(item.getSnippet());
         markerOptions.title(item.getTitle());
         super.onBeforeClusterItemRendered(item, markerOptions);
     }
