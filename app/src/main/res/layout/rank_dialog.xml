@@ -24,6 +24,7 @@
         android:stepSize="1.0"
         android:progressTint="@color/colorGold"
         android:progressBackgroundTint="@color/colorBlack"
+        android:secondaryProgressTint="@color/colorGold"
         android:isIndicator="false"/>
 
     <Button android:id="@+id/rank_dialog_button"

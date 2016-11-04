@@ -84,11 +84,16 @@ class RatingEndpoint(webapp2.RequestHandler):
       installation_id = self.request.get('installation_id', None)
       if installation_id is None:
         rating_list = Rating.query(Rating.playground_name == playground_name)
+        logging.debug("get global rating")
       else:
         rating_list = Rating.query(ndb.AND(Rating.playground_name == playground_name,
                                            Rating.installation_id == installation_id)
-                                  )                            
-      mark_list = [r.mark for r in rating_list]
+                                  )   
+        logging.debug("get installation rating")       
+      # None checking just in case to avoid the sum error  
+      # and cast to float to avoid int division in the sum                
+      mark_list = [float(r.mark) for r in rating_list if r.mark is not None] 
+      logging.debug(mark_list)
       if len(mark_list) > 0:
         body = {'rating': round(sum(mark_list)/len(mark_list), 1), 'count': len(mark_list)}
       else:

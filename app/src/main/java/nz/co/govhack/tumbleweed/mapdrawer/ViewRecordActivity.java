@@ -152,20 +152,12 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         PictureLoader loader = new PictureLoader();
         loader.execute(new String[] {url});
 
-        findViewsById();
 
-//        getRatingBar.setOnRatingBarChangeListener(this);
-
-        /*
-        RecordClick record = new RecordClick();
-        record.execute();
-
-        UpdateRating update = new UpdateRating();
-        update.execute();*/
+        setRatingBar = (RatingBar) findViewById(R.id.setRating);
+        countText = (TextView) findViewById(R.id.countText);
 
         recordClick();
         updateGlobalRating();
-//        updateInstallationRating();
         checkIfFavorite();
         checkIfVisited();
 
@@ -283,12 +275,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     }
 
 
-    private void findViewsById() {
-        // getRatingBar = (RatingBar) findViewById(R.id.getRating);
-        setRatingBar = (RatingBar) findViewById(R.id.setRating);
-        countText = (TextView) findViewById(R.id.countText);
-    }
-
     private JSONObject findRecordById(String recordId) {
         try {
             for(int i = 0; i < parksJson.length(); i++) {
@@ -332,9 +318,9 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setRatingBar.setRating((int) globalRate);
+                        setRatingBar.setRating((float) globalRate);
                         if(count == 0) {
-                            countText.setText("No user rating yet");
+                            countText.setText("No rating yet");
                         } else if(count == 1) {
                             countText.setText("1 user rating");
                         } else {
@@ -374,7 +360,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        getRatingBar.setRating((int) curRate);
+                        getRatingBar.setRating((float) curRate);
                     }
                 });
                 Log.i("****", "The Http response is: " + response.toString());

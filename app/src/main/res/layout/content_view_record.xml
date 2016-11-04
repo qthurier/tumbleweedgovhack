@@ -35,6 +35,7 @@
                 android:layout_height="wrap_content"
                 android:progressTint="@color/colorGold"
                 android:progressBackgroundTint="@color/colorBlack"
+                android:secondaryProgressTint="@color/colorBlack"
                 android:isIndicator="true"
                 android:numStars="5"
                 android:stepSize="0.1"
