@@ -38,8 +38,7 @@ import java.util.HashMap;
 
 
 public class MapsFragment extends SupportMapFragment implements OnMapReadyCallback,
-         ClusterManager.OnClusterItemInfoWindowClickListener<PlaygroundMarker>,
-         ClusterManager.OnClusterClickListener<PlaygroundMarker>{
+         ClusterManager.OnClusterItemInfoWindowClickListener<PlaygroundMarker>{
 
     private GoogleMap mMap;
     //private JSONArray parksJson;
@@ -80,14 +79,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        /*
-        String json = Utils.loadJSONFromAsset(getActivity().getApplicationContext().getAssets());
-        try {
-            parksJson = new JSONArray(json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        */
 
     }
 
@@ -154,31 +145,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    /*
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        Log.i("##################", "########################");
-        mMap.setMyLocationEnabled(true);
-        if (requestCode == MY_LOCATION_PERMISSION_REQUEST_CODE) {
-            // Enable the My Location button if the permission has been granted.
-            if (PermissionUtils.isPermissionGranted(permissions, grantResults,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                mUiSettings.setMyLocationButtonEnabled(true);
-                mMap.setMyLocationEnabled(true);
-            }
-
-        } else if (requestCode == LOCATION_LAYER_PERMISSION_REQUEST_CODE) {
-            // Enable the My Location layer if the permission has been granted.
-            if (PermissionUtils.isPermissionGranted(permissions, grantResults,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                mMap.setMyLocationEnabled(true);
-            } else {
-                mLocationPermissionDenied = true;
-            }
-        }
-    }
- */
 
     public GoogleMap getMyMap() {
         return mMap;
@@ -223,7 +189,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
             //http://stackoverflow.com/questions/30958224/android-maps-utils-clustering-show-infowindow
             mMap.setOnInfoWindowClickListener(mClusterManager);
             mClusterManager.setOnClusterItemInfoWindowClickListener(this);
-            mClusterManager.setOnClusterClickListener(this);
         }
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -273,14 +238,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         startActivity(intent);
     }
 
-
-
-    @Override
-    public boolean onClusterClick(Cluster<PlaygroundMarker> cl) {
-        Log.i("##################", "########################");
-        Toast.makeText(getActivity(), "More playgrounds here!", Toast.LENGTH_LONG).show();
-        return false;
-    }
 
 }
 

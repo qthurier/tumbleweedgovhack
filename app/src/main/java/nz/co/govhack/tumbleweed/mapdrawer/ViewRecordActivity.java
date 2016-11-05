@@ -85,7 +85,9 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
         imageView = (ImageView) findViewById(R.id.background_image);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_view);
-        setSupportActionBar(toolbar);
+        //setSupportActionBar(toolbar);
+
+        Toolbar toolbar_title = (Toolbar) findViewById(R.id.toolbar);
 
         /*bug
         top ranked
@@ -142,8 +144,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             mRecord = findRecordById(recordId);
 
             try {
-                toolbar.setTitle(mRecord.getString("name"));
-                setSupportActionBar(toolbar);
+                toolbar_title.setTitle(mRecord.getString("name"));
+                //setSupportActionBar(toolbar_title);
 
                 String details = "<h2>Address</h2>" +
                         "<p>" + mRecord.getString("name") + "<br>" + mRecord.getString("address") + "</p>" +

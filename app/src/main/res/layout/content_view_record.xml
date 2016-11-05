@@ -19,16 +19,6 @@
             android:orientation="vertical"
             >
 
-            <!--<RatingBar android:id="@+id/getRating"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:numStars="5"-->
-                <!--android:stepSize="1.0"-->
-                <!--android:layout_marginLeft="10dp"-->
-                <!--android:progressTint="@color/colorGold"-->
-                <!--android:progressBackgroundTint="@color/colorBlack"-->
-                <!--/>-->
-
             <RatingBar
                 android:id="@+id/setRating"
                 android:layout_width="wrap_content"
