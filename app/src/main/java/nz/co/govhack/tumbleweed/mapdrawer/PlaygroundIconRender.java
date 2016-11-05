@@ -27,6 +27,7 @@ class PlaygroundIconRender extends DefaultClusterRenderer<PlaygroundMarker> {
         super.onBeforeClusterItemRendered(item, markerOptions);
     }
 
+
 /*
 
     @Override

@@ -91,7 +91,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         top ranked
         camera move when dont have favorite/vist
          */
-        
+
         toolbarFavorite = (MaterialFavoriteButton) findViewById(R.id.heart);
         toolbarFavorite.setFavorite(false);
         toolbarFavorite.setOnFavoriteChangeListener(
@@ -498,41 +498,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         if(type.equals("save")) {
             isVisited = true;
         }
-    }
-
-    private void unRegisterFavorite(){
-        isFavorite = false;
-    }
-
-    private void registerVisit() {
-        OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.save_visit_url);
-        FormBody formBody = new FormBody.Builder()
-                .add("installation_id", installationId)
-                .add("record_id", recordId)
-                .add("playground_name", playgroundName)
-                .build();
-        Request request = new Request.Builder()
-                .url(url)
-                .post(formBody)
-                .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i("****", "Failed to register visit", e);
-            }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                updateGlobalRating();
-                Log.i("****", "Visit has been registered");
-                Log.i("****", "The Http response is: " + response.toString());
-            }
-        });
-        isVisited = true;
-    }
-
-    private void unRegisterVisit() {
-        isVisited = false;
     }
 
     private void recordClick() {

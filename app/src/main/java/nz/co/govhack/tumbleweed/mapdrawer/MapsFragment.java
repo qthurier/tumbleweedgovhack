@@ -235,19 +235,24 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
             @Override
             public View getInfoContents(Marker marker) {
-                LinearLayout info = new LinearLayout(getContext());
-                info.setOrientation(LinearLayout.VERTICAL);
-                TextView title = new TextView(getContext());
-                title.setTextColor(Color.BLACK);
-                title.setGravity(Gravity.CENTER);
-                title.setTypeface(null, Typeface.BOLD);
-                title.setText(marker.getTitle());
-                TextView snippet = new TextView(getContext());
-                snippet.setTextColor(Color.GRAY);
-                snippet.setText(marker.getSnippet());
-                info.addView(title);
-                info.addView(snippet);
-                return info;
+                if(marker.getTitle() != null) {
+                    LinearLayout info = new LinearLayout(getContext());
+                    info.setOrientation(LinearLayout.VERTICAL);
+                    TextView title = new TextView(getContext());
+                    title.setTextColor(Color.BLACK);
+                    title.setGravity(Gravity.CENTER);
+                    title.setTypeface(null, Typeface.BOLD);
+                    title.setText(marker.getTitle());
+                    TextView snippet = new TextView(getContext());
+                    snippet.setTextColor(Color.GRAY);
+                    snippet.setText(marker.getSnippet());
+                    info.addView(title);
+                    info.addView(snippet);
+                    return info;
+                } else {
+                    marker.hideInfoWindow();
+                    return null;
+                }
             }
         });
     }
@@ -261,14 +266,14 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onClusterItemInfoWindowClick(PlaygroundMarker pm) {
         int id = mPlaygroundMarkers.get(pm);
-
         Bundle b = new Bundle();
         b.putString("record_id", "" + id);
-
         Intent intent = new Intent(getActivity(), ViewRecordActivity.class);
         intent.putExtras(b);
         startActivity(intent);
     }
+
+
 
     @Override
     public boolean onClusterClick(Cluster<PlaygroundMarker> cl) {
