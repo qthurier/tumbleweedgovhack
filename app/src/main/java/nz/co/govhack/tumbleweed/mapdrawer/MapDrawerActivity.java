@@ -189,7 +189,7 @@ public class MapDrawerActivity extends AppCompatActivity
 
     private void getFavoritesPlaygrounds() { // might be better to look for the favorite at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.get_favorite_url);
+        String url = getResources().getString(R.string.get_favorite_list_url);
         Request request = new Request.Builder().url(url + "?installation_id=" + installationId).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -240,7 +240,7 @@ public class MapDrawerActivity extends AppCompatActivity
 
     private void getVisitedPlaygrounds() { // might be better to look for the visited at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.get_visited_url);
+        String url = getResources().getString(R.string.get_visit_list_url);
         Request request = new Request.Builder().url(url + "?installation_id=" + installationId).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override

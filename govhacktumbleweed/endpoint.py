@@ -147,21 +147,29 @@ class FavoriteEndpoint(webapp2.RequestHandler):
       installation_id = self.request.POST.get('installation_id')
       record_id = self.request.POST.get('record_id')
       playground_name = self.request.POST.get('playground_name')
-      logging.debug(self.request.POST)
-      logging.debug(installation_id)
-      logging.debug(record_id)
-      logging.debug(playground_name)
-      favorites = Favorites.query(Favorites.installation_id == installation_id).fetch(1)
-      if len(favorites) > 0 :
-        if playground_name not in favorites[0].playground_name_list:
-          favorites[0].record_id_list.append(int(record_id))
-          favorites[0].playground_name_list.append(playground_name)
-          favorites[0].put()
-      else:
-        Favorites(installation_id=installation_id, 
+      what_to_do = self.request.POST.get('type')
+      if what_to_do == "save":
+        favorites = Favorites.query(Favorites.installation_id == installation_id).fetch(1)
+        if len(favorites) > 0 :
+          if playground_name not in favorites[0].playground_name_list: # should always be true but just in case 
+            favorites[0].record_id_list.append(int(record_id))
+            favorites[0].playground_name_list.append(playground_name)
+            favorites[0].put()
+        else:
+          Favorites(installation_id=installation_id, 
                   record_id_list=[int(record_id)], 
                   playground_name_list=[playground_name]).put()
-      self.response.status = 200   
+        self.response.status = 200
+      else:
+        favorites = Favorites.query(Favorites.installation_id == installation_id).fetch(1)
+        if len(favorites) > 0 :
+          if playground_name in favorites[0].playground_name_list: # should always be true just in case 
+            favorites[0].record_id_list.remove(int(record_id))
+            favorites[0].playground_name_list.remove(playground_name)
+            favorites[0].put()
+        else:
+          pass # shouldnt happen
+        self.response.status = 200
 
     """get a list of favorite playgrounds"""
     def get(self):
@@ -207,17 +215,29 @@ class VisitedEndpoint(webapp2.RequestHandler):
       installation_id = self.request.POST.get('installation_id')
       record_id = self.request.POST.get('record_id')
       playground_name = self.request.POST.get('playground_name')
-      visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
-      if len(visited) > 0 :
-        if playground_name not in visited[0].playground_name_list:
-          visited[0].record_id_list.append(int(record_id))
-          visited[0].playground_name_list.append(playground_name)
-          visited[0].put()
-      else:
-        Visited(installation_id=installation_id, 
+      what_to_do = self.request.POST.get('type')
+      if what_to_do == "save":
+        visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
+        if len(visited) > 0 :
+          if playground_name not in visited[0].playground_name_list: # should always be true but just in case 
+            visited[0].record_id_list.append(int(record_id))
+            visited[0].playground_name_list.append(playground_name)
+            visited[0].put()
+        else:
+          Visited(installation_id=installation_id, 
                   record_id_list=[int(record_id)], 
                   playground_name_list=[playground_name]).put()
-      self.response.status = 200   
+        self.response.status = 200
+      else:
+        visited = Visited.query(Visited.installation_id == installation_id).fetch(1)
+        if len(visited) > 0 :
+          if playground_name in visited[0].playground_name_list: # should always be true just in case 
+            visited[0].record_id_list.remove(int(record_id))
+            visited[0].playground_name_list.remove(playground_name)
+            visited[0].put()
+        else:
+          pass # shouldnt happen
+        self.response.status = 200
 
     """get a list of favorite playgrounds"""
     def get(self):
@@ -268,10 +288,10 @@ class TopEndpoint(webapp2.RequestHandler):
 
 APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/rating', RatingEndpoint),
-                                       ('/favorite', FavoriteEndpoint),
-                                       ('/visited', VisitedEndpoint),
+                                       ('/favorite_endpoint', FavoriteEndpoint),
+                                       ('/visit_endpoint', VisitedEndpoint),
                                        ('/check_favorite', CheckFavoriteEndpoint),
-                                       ('/check_visited', CheckVisitedEndpoint),
+                                       ('/check_visit', CheckVisitedEndpoint),
                                        ('/top', TopEndpoint)], debug=True)
 
 

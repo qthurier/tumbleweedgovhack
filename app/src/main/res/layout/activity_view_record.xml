@@ -57,7 +57,8 @@
                 app:mfb_rotation_duration="400"
                 app:mfb_rotation_angle="360"
                 app:mfb_bounce_duration="700"
-                app:mfb_type="heart" />
+                app:mfb_type="heart"
+                app:mfb_color="black"/>
 
             <com.github.ivbaranov.mfb.MaterialFavoriteButton
                 android:id="@+id/check"

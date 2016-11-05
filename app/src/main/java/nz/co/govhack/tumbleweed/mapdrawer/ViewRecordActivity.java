@@ -56,6 +56,10 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     private int count;
     private Boolean isFavorite;
     private Boolean isVisited;
+
+    private Boolean favoriteInit = true;
+    private Boolean visitedInit = true;
+
     private float curRate;
     private float globalRate;
 
@@ -73,7 +77,6 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     ImageView imageView = null;
 
     boolean initialisation = true;
-    boolean favoriteInit = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,13 +87,46 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_view);
         setSupportActionBar(toolbar);
 
+        /*bug
+        top ranked
+        camera move when dont have favorite/vist
+         */
+        
         toolbarFavorite = (MaterialFavoriteButton) findViewById(R.id.heart);
         toolbarFavorite.setFavorite(false);
-        toolbarFavorite.setColor(MaterialFavoriteButton.STYLE_BLACK);
-        toolbarFavorite.setType(MaterialFavoriteButton.STYLE_HEART);
+        toolbarFavorite.setOnFavoriteChangeListener(
+                new MaterialFavoriteButton.OnFavoriteChangeListener() {
+                    @Override
+                    public void onFavoriteChanged(MaterialFavoriteButton buttonView, boolean favorite) {
+                        if (toolbarFavorite.isFavorite()) {
+                            if(!favoriteInit) {
+                                updateFavorite("save");
+                                Snackbar.make(buttonView, "This playground has been added to your favorites", Snackbar.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            updateFavorite("remove");
+                            Snackbar.make(buttonView, "This playground has been removed from your favorites", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
         toolbarVisited = (MaterialFavoriteButton) findViewById(R.id.check);
         toolbarVisited.setFavorite(false);
+        toolbarVisited.setOnFavoriteChangeListener(
+                new MaterialFavoriteButton.OnFavoriteChangeListener() {
+                    @Override
+                    public void onFavoriteChanged(MaterialFavoriteButton buttonView, boolean favorite) {
+                        if (toolbarVisited.isFavorite()) {
+                            if(!visitedInit) {
+                                updateVisit("save");
+                                Snackbar.make(buttonView, "Your visit in this playground has been saved", Snackbar.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            updateVisit("remove");
+                            Snackbar.make(buttonView, "Your visit in this playground has been removed", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
         String json = Utils.loadJSONFromAsset(getAssets());
 
@@ -396,13 +432,17 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         });
     }
 
-    private void registerFavorite() {
+    private void updateFavorite(String type) {
         OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.register_favorite_url);
+        String url = getResources().getString(R.string.remove_favorite_url); // default behavior is remove
+        if(type.equals("save")) {
+            url = getResources().getString(R.string.save_favorite_url);
+        }
         FormBody formBody = new FormBody.Builder()
                 .add("installation_id", installationId)
                 .add("record_id", recordId)
                 .add("playground_name", playgroundName)
+                .add("type", type)
                 .build();
         Request request = new Request.Builder()
                 .url(url)
@@ -411,16 +451,53 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i("****", "Failed to register favorite", e);
+                Log.i("****", "Failed to update favorite", e);
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 updateGlobalRating();
-                Log.i("****", "Favorite has been registered");
+                Log.i("****", "Favorite has been updated");
                 Log.i("****", "The Http response is: " + response.toString());
             }
         });
-        isFavorite = true;
+        isFavorite = false; // default behavior is remove
+        if(type.equals("save")) {
+            isFavorite = true;
+        }
+    }
+
+    private void updateVisit(String type) {
+        OkHttpClient client = new OkHttpClient();
+        String url = getResources().getString(R.string.remove_visit_url); // default behavior is remove
+        if(type.equals("save")) {
+            url = getResources().getString(R.string.save_visit_url);
+        }
+        FormBody formBody = new FormBody.Builder()
+                .add("installation_id", installationId)
+                .add("record_id", recordId)
+                .add("playground_name", playgroundName)
+                .add("type", type)
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.i("****", "Failed to update visit", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                updateGlobalRating();
+                Log.i("****", "Visit has been updated");
+                Log.i("****", "The Http response is: " + response.toString());
+            }
+        });
+        isVisited = false; // default behavior is remove
+        if(type.equals("save")) {
+            isVisited = true;
+        }
     }
 
     private void unRegisterFavorite(){
@@ -429,7 +506,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
     private void registerVisit() {
         OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.register_visited_url);
+        String url = getResources().getString(R.string.save_visit_url);
         FormBody formBody = new FormBody.Builder()
                 .add("installation_id", installationId)
                 .add("record_id", recordId)
@@ -487,7 +564,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
 
     private void checkIfFavorite() {
         OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.check_favorite);
+        String url = getResources().getString(R.string.check_favorite_url);
         Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -510,41 +587,17 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     @Override
                     public void run() {
                         toolbarFavorite.setFavorite(isFavorite);
+                        favoriteInit = false;
                     }
                 });
-
-                toolbarFavorite.setOnFavoriteChangeListener(
-                        new MaterialFavoriteButton.OnFavoriteChangeListener() {
-                            @Override
-                            public void onFavoriteChanged(MaterialFavoriteButton buttonView, boolean favorite) {
-                                    if (toolbarFavorite.isFavorite()) {
-                                        if(favoriteInit == false) {
-                                            favoriteInit = false;
-                                            registerFavorite();
-                                            Snackbar.make(buttonView, "This playground has been added to your favorites", Snackbar.LENGTH_SHORT).show();
-                                        }
-                                    } else {
-                                        unRegisterFavorite();
-                                        Snackbar.make(buttonView, "This playground has been removed from your favorites", Snackbar.LENGTH_SHORT).show();
-                                    }
-                                }
-                        });
-
-                if(isFavorite == false) {
-
-                } else {
-                    toolbarFavorite.isFavorite();
-                }
                 Log.i("**** check if favorite", "The Http response is: " + response.toString());
-                Log.i("**** check if favorite", isFavorite.toString());
-
             }
         });
     }
 
     private void checkIfVisited() {
         OkHttpClient client = new OkHttpClient();
-        String url = getResources().getString(R.string.check_visited);
+        String url = getResources().getString(R.string.check_visit_url);
         Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -558,33 +611,19 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     JSONObject Jobject = new JSONObject(jsonData);
                     isVisited = (Boolean) Jobject.getBoolean("check");
                 } catch (JSONException e) {
-                    Log.i("****", "Visited check failed", e);
+                    Log.i("****", "Visit check failed", e);
                 } catch (IOException e) {
-                    Log.i("****", "Visited check failed", e);
+                    Log.i("****", "Visit check failed", e);
                 }
-                /*
-                if(isVisited == false) {
-                    visited.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            registerVisit();
-                            Snackbar.make(view, "Your visit in this playground has been recorded", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });
-                } else {
-                    visited.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            unRegisterVisit();
-                            Snackbar.make(view, "Your visit in this playground has been removed", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });
-                } */
 
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        toolbarVisited.setFavorite(isVisited);
+                        visitedInit = false;
+                    }
+                });
                 Log.i("**** check if visited", "The Http response is: " + response.toString());
-                Log.i("**** check if visited", isVisited.toString());
             }
         });
     }
