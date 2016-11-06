@@ -69,6 +69,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     MaterialFavoriteButton toolbarVisited;
 
     String installationId = "";
+    String key = "";
     String recordId = "";
     String playgroundName = "";
     String lat = "";
@@ -163,6 +164,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 ((TextView) findViewById(R.id.record_details)).setText(Html.fromHtml(details));
 
                 installationId = Installation.id(getApplicationContext());
+                key = getResources().getString(R.string.endpoint_key);
                 playgroundName = mRecord.getString("name");
                 lat = mRecord.getString("lat");
                 lon = mRecord.getString("long");

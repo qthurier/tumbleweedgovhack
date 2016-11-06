@@ -5,6 +5,29 @@ import logging
 import json
 import urllib2
 
+
+class EndpointKey(ndb.Model):
+    """A model to store the endpoint keys"""
+    key = ndb.StringProperty()
+    created_at = ndb.DateTimeProperty(auto_now_add=True)
+
+def handle_401(request, response, exception):
+    logging.debug("header check didnt pass")
+    body = {'status': 'authentication failed'}
+    response.headers['Content-Type'] = 'application/json'   
+    response.out.write(json.dumps(body))
+
+class BasicHandler(webapp2.RequestHandler):
+    def __init__(self, request, response):
+        webapp2.RequestHandler.__init__(self, request, response)
+        client_key = self.request.headers['EndpointKey']
+        logging.debug(client_key)
+        current_key = EndpointKey.query().order(-EndpointKey.created_at).fetch(1)
+        if client_key != current_key:
+          self.abort(401)
+
+###### 
+
 class Rating(ndb.Model):
     """A model to store a playground rating"""
     record_id = ndb.IntegerProperty()
@@ -20,7 +43,7 @@ class Playground(ndb.Model):
     nb_ratings = ndb.IntegerProperty()
     rating = ndb.FloatProperty()
 
-class RatingEndpoint(webapp2.RequestHandler):
+class RatingEndpoint(BasicHandler):
     """Store a rating"""
     def _update_playground_rating(self, playground_name, rating):
         playground = Playground.query(Playground.name == playground_name).fetch(1)
@@ -111,7 +134,7 @@ class Click(ndb.Model):
     longitude = ndb.FloatProperty()
     created_at = ndb.DateTimeProperty(auto_now_add=True)
                                            
-class StoreClick(webapp2.RequestHandler):
+class StoreClick(BasicHandler):
     """Store a click"""
     def post(self):
       installation_id = self.request.POST.get('installation_id')
@@ -140,7 +163,7 @@ class Favorites(ndb.Model):
     playground_name_list = ndb.StringProperty(repeated=True)
 
                                            
-class FavoriteEndpoint(webapp2.RequestHandler):
+class FavoriteEndpoint(BasicHandler):
 
     """register a playground as a favorite"""
     def post(self):
@@ -184,7 +207,7 @@ class FavoriteEndpoint(webapp2.RequestHandler):
       self.response.out.write(json.dumps(body))
 
 
-class CheckFavoriteEndpoint(webapp2.RequestHandler):
+class CheckFavoriteEndpoint(BasicHandler):
 
     """check if a playground belongs to the favorite"""
     def get(self):
@@ -208,7 +231,7 @@ class Visited(ndb.Model):
     record_id_list = ndb.IntegerProperty(repeated=True)
     playground_name_list = ndb.StringProperty(repeated=True)
 
-class VisitedEndpoint(webapp2.RequestHandler):
+class VisitedEndpoint(BasicHandler):
 
     """register a visited playground"""
     def post(self):
@@ -251,7 +274,7 @@ class VisitedEndpoint(webapp2.RequestHandler):
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))
 
-class CheckVisitedEndpoint(webapp2.RequestHandler):
+class CheckVisitedEndpoint(BasicHandler):
 
     """check if a playground has been visited"""
     def get(self):
@@ -269,7 +292,7 @@ class CheckVisitedEndpoint(webapp2.RequestHandler):
 
 ##############
 
-class TopEndpoint(webapp2.RequestHandler):
+class TopEndpoint(BasicHandler):
 
     """get the list of favorite playgrounds"""
     def get(self):
@@ -295,4 +318,4 @@ APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/top', TopEndpoint)], debug=True)
 
 
-
+APPLICATION.error_handlers[401] = handle_401

@@ -56,7 +56,9 @@ public class MapDrawerActivity extends AppCompatActivity
 
     private ArrayList<String> favoriteParks;
     String installationId = "";
+    String key = "";
     MapsFragment fragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,7 @@ public class MapDrawerActivity extends AppCompatActivity
 
         // load stuff required for filtering --> the installation id and the parks
         installationId = Installation.id(getApplicationContext());
+        key = getResources().getString(R.string.endpoint_key);
 
         String json = Utils.loadJSONFromAsset(this.getApplicationContext().getAssets());
         try {
@@ -156,7 +159,7 @@ public class MapDrawerActivity extends AppCompatActivity
         } else if (id == R.id.visited_playgrounds) {
             getVisitedPlaygrounds();
         } else if (id == R.id.top_playgrounds) {
-            getTopPlaygrounds(R.id.top);
+            getTopPlaygrounds(getResources().getInteger(R.integer.top));
         } else if (id == R.id.nav_share) {
             shareApp();
 
@@ -190,58 +193,64 @@ public class MapDrawerActivity extends AppCompatActivity
     private void getFavoritesPlaygrounds() { // might be better to look for the favorite at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_favorite_list_url);
-        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).get().build();
+        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).addHeader("EndpointKey", key).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.i("****", "Failed to get favorites playgrounds", e);
             }
+
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    String jsonData = response.body().string();
-                    JSONObject Jobject = new JSONObject(jsonData);
-                    JSONArray playgrounds = Jobject.getJSONArray("playground_name_list");
-                    favoriteParks = new ArrayList<String>();
-                    if (playgrounds != null) {
-                        for (int i=0; i<  playgrounds.length(); i++){
-                            favoriteParks.add(playgrounds.get(i).toString());
+                if (response.code() == 200) {
+                    try {
+                        String jsonData = response.body().string();
+                        JSONObject Jobject = new JSONObject(jsonData);
+                        JSONArray playgrounds = Jobject.getJSONArray("playground_name_list");
+                        favoriteParks = new ArrayList<String>();
+                        if (playgrounds != null) {
+                            for (int i = 0; i < playgrounds.length(); i++) {
+                                favoriteParks.add(playgrounds.get(i).toString());
+                            }
                         }
-                    }
 
-                    parksJson = new JSONArray();
-                    for(int i = 0; i < allParksJson.length(); i++) {
-                        try {
-                            String name = ((JSONObject) allParksJson.get(i)).getString("name");
-                            if(favoriteParks.contains(name)) parksJson.put((JSONObject) allParksJson.get(i));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        parksJson = new JSONArray();
+                        for (int i = 0; i < allParksJson.length(); i++) {
+                            try {
+                                String name = ((JSONObject) allParksJson.get(i)).getString("name");
+                                if (favoriteParks.contains(name))
+                                    parksJson.put((JSONObject) allParksJson.get(i));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
+
+                    } catch (JSONException e) {
+                        Log.i("****", "Favorite Playgrounds filtering failed", e);
+                    } catch (IOException e) {
+                        Log.i("****", "Favorite Playgrounds filtering failed", e);
                     }
 
-                } catch (JSONException e) {
-                    Log.i("****", "Favorite Playgrounds filtering failed", e);
-                } catch (IOException e) {
-                    Log.i("****", "Favorite Playgrounds filtering failed", e);
-                }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            fragment.getMyMap().clear();
+                            fragment.onMapReady(fragment.getMyMap());
+                        }
+                    });
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        fragment.getMyMap().clear();
-                        fragment.onMapReady(fragment.getMyMap());
-                    }
-                });
-
-                Log.i("****", "The Http response is: " + response.toString());
+                    Log.i("****", "The Http response is: " + response.toString());
+            } else {
+                Log.i("****", "unsuccessful http request");
             }
-        });
+          }
+       });
     }
 
     private void getVisitedPlaygrounds() { // might be better to look for the visited at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_visit_list_url);
-        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).get().build();
+        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).addHeader("EndpointKey", key).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -249,6 +258,7 @@ public class MapDrawerActivity extends AppCompatActivity
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 200) {
                 try {
                     String jsonData = response.body().string();
                     JSONObject Jobject = new JSONObject(jsonData);
@@ -285,57 +295,65 @@ public class MapDrawerActivity extends AppCompatActivity
                 });
 
                 Log.i("****", "The Http response is: " + response.toString());
+            } else {
+                  Log.i("****", "unsuccessful http request");
             }
+          }
         });
     }
 
     private void getTopPlaygrounds(int top) { // might be better to look for the top at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_top_url);
-        Request request = new Request.Builder().url(url + "?top=" + String.valueOf(top)).get().build();
+        Request request = new Request.Builder().url(url + "?top=" + String.valueOf(top)).addHeader("EndpointKey", key).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.i("****", "Failed to get top ranked playgrounds", e);
             }
+
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    String jsonData = response.body().string();
-                    JSONObject Jobject = new JSONObject(jsonData);
-                    JSONArray playgrounds = Jobject.getJSONArray("playground_name_list");
-                    favoriteParks = new ArrayList<String>();
-                    if (playgrounds != null) {
-                        for (int i=0; i<  playgrounds.length(); i++){
-                            favoriteParks.add(playgrounds.get(i).toString());
+                if (response.code() == 200) {
+                    try {
+                        String jsonData = response.body().string();
+                        JSONObject Jobject = new JSONObject(jsonData);
+                        JSONArray playgrounds = Jobject.getJSONArray("playground_name_list");
+                        favoriteParks = new ArrayList<String>();
+                        if (playgrounds != null) {
+                            for (int i = 0; i < playgrounds.length(); i++) {
+                                favoriteParks.add(playgrounds.get(i).toString());
+                            }
                         }
+
+                        parksJson = new JSONArray();
+                        for (int i = 0; i < allParksJson.length(); i++) {
+                            try {
+                                String name = ((JSONObject) allParksJson.get(i)).getString("name");
+                                if (favoriteParks.contains(name))
+                                    parksJson.put((JSONObject) allParksJson.get(i));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    } catch (JSONException e) {
+                        Log.i("****", "Top ranked Playgrounds filtering failed", e);
+                    } catch (IOException e) {
+                        Log.i("****", "Top ranked Playgrounds filtering failed", e);
                     }
 
-                    parksJson = new JSONArray();
-                    for(int i = 0; i < allParksJson.length(); i++) {
-                        try {
-                            String name = ((JSONObject) allParksJson.get(i)).getString("name");
-                            if(favoriteParks.contains(name)) parksJson.put((JSONObject) allParksJson.get(i));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            fragment.getMyMap().clear();
+                            fragment.onMapReady(fragment.getMyMap());
                         }
-                    }
-
-                } catch (JSONException e) {
-                    Log.i("****", "Top ranked Playgrounds filtering failed", e);
-                } catch (IOException e) {
-                    Log.i("****", "Top ranked Playgrounds filtering failed", e);
+                    });
+                    Log.i("****", "The Http response is: " + response.toString());
+                } else {
+                    Log.i("****", "unsuccessful http request");
                 }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        fragment.getMyMap().clear();
-                        fragment.onMapReady(fragment.getMyMap());
-                    }
-                });
-
-                Log.i("****", "The Http response is: " + response.toString());
             }
         });
     }
