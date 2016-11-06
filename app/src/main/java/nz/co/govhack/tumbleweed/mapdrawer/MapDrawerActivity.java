@@ -56,7 +56,7 @@ public class MapDrawerActivity extends AppCompatActivity
 
     private ArrayList<String> favoriteParks;
     String installationId = "";
-    String key = "";
+    String token = "";
     MapsFragment fragment;
 
 
@@ -82,7 +82,7 @@ public class MapDrawerActivity extends AppCompatActivity
 
         // load stuff required for filtering --> the installation id and the parks
         installationId = Installation.id(getApplicationContext());
-        key = getResources().getString(R.string.endpoint_key);
+        token = Installation.token(getApplicationContext());
 
         String json = Utils.loadJSONFromAsset(this.getApplicationContext().getAssets());
         try {
@@ -193,7 +193,9 @@ public class MapDrawerActivity extends AppCompatActivity
     private void getFavoritesPlaygrounds() { // might be better to look for the favorite at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_favorite_list_url);
-        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).addHeader("EndpointKey", key).get().build();
+        Request request = new Request.Builder().url(url + "?installation_id=" + installationId)
+                .addHeader("Id", installationId)
+                .addHeader("Token", token).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -250,7 +252,9 @@ public class MapDrawerActivity extends AppCompatActivity
     private void getVisitedPlaygrounds() { // might be better to look for the visited at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_visit_list_url);
-        Request request = new Request.Builder().url(url + "?installation_id=" + installationId).addHeader("EndpointKey", key).get().build();
+        Request request = new Request.Builder().url(url + "?installation_id=" + installationId)
+                .addHeader("Id", installationId)
+                .addHeader("Token", token).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -305,7 +309,9 @@ public class MapDrawerActivity extends AppCompatActivity
     private void getTopPlaygrounds(int top) { // might be better to look for the top at start to avoid the runOnUiThread call
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_top_url);
-        Request request = new Request.Builder().url(url + "?top=" + String.valueOf(top)).addHeader("EndpointKey", key).get().build();
+        Request request = new Request.Builder().url(url + "?top=" + String.valueOf(top))
+                .addHeader("Id", installationId)
+                .addHeader("Token", token).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

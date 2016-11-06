@@ -4,11 +4,12 @@ import webapp2
 import logging
 import json
 import urllib2
+import os
 
-
-class EndpointKey(ndb.Model):
+class EndpointToken(ndb.Model):
     """A model to store the endpoint keys"""
-    key = ndb.StringProperty()
+    installation_id = ndb.StringProperty()
+    token = ndb.StringProperty()
     created_at = ndb.DateTimeProperty(auto_now_add=True)
 
 def handle_401(request, response, exception):
@@ -20,11 +21,22 @@ def handle_401(request, response, exception):
 class BasicHandler(webapp2.RequestHandler):
     def __init__(self, request, response):
         webapp2.RequestHandler.__init__(self, request, response)
-        client_key = self.request.headers['EndpointKey']
-        logging.debug(client_key)
-        current_key = EndpointKey.query().order(-EndpointKey.created_at).fetch(1)
-        if client_key != current_key:
+        client_token = self.request.headers['Token']
+        installation_id = self.request.headers['Id']
+        EndpointToken.query(EndpointToken.installation_id == installation_id).fetch(1)
+        server_token = EndpointToken.query(EndpointToken.installation_id == installation_id).fetch(1) # suppose uniquness of installation_id
+        if client_token != server_token:
           self.abort(401)
+
+class Token(webapp2.RequestHandler): # the only one which unherit from BasicHandler
+    def get(self):
+      installation_id = self.request.get('installation_id')
+      token = os.urandom(24).encode('hex')
+      EndpointToken(installation_id=installation_id, token=token).put()
+      body = {'token': token}
+      self.response.status = 200
+      self.response.headers['Content-Type'] = 'application/json'   
+      self.response.out.write(json.dumps(body))
 
 ###### 
 
@@ -315,7 +327,8 @@ APPLICATION = webapp2.WSGIApplication([('/store_click', StoreClick),
                                        ('/visit_endpoint', VisitedEndpoint),
                                        ('/check_favorite', CheckFavoriteEndpoint),
                                        ('/check_visit', CheckVisitedEndpoint),
-                                       ('/top', TopEndpoint)], debug=True)
+                                       ('/top', TopEndpoint),
+                                       ('/token', Token)], debug=True)
 
 
 APPLICATION.error_handlers[401] = handle_401
