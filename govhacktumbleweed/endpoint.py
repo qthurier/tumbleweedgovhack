@@ -15,6 +15,7 @@ class EndpointToken(ndb.Model):
 def handle_401(request, response, exception):
     logging.debug("header check didnt pass")
     body = {'status': 'authentication failed'}
+    response.status = 401
     response.headers['Content-Type'] = 'application/json'   
     response.out.write(json.dumps(body))
 
@@ -25,7 +26,9 @@ class BasicHandler(webapp2.RequestHandler):
         installation_id = self.request.headers['Id']
         EndpointToken.query(EndpointToken.installation_id == installation_id).fetch(1)
         server_token = EndpointToken.query(EndpointToken.installation_id == installation_id).fetch(1) # suppose uniquness of installation_id
-        if client_token != server_token:
+        logging.debug(client_token)
+        logging.debug(server_token)
+        if len(server_token) < 1 or client_token != server_token[0].token:
           self.abort(401)
 
 class Token(webapp2.RequestHandler): # the only one which unherit from BasicHandler

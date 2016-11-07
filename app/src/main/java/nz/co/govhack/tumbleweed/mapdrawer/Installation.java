@@ -2,12 +2,14 @@ package nz.co.govhack.tumbleweed.mapdrawer;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -42,20 +44,16 @@ public class Installation {
         return sID;
     }
 
-    public synchronized static String token(Context context) {
-        String id = id(context);
+    public synchronized static void getToken(String id, Context context) {
         if (sToken == null) {
             File tokenFile = new File(context.getFilesDir(), TOKEN);
             mContext = context;
             try {
                 if (!tokenFile.exists()) writeTokenFile(id);
-                while(!tokenFile.exists()) Thread.sleep(100); //birk
-                sToken = readTokenFile(tokenFile);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-        return sToken;
     }
 
     private static String readInstallationFile(File installation) throws IOException {
@@ -106,12 +104,19 @@ public class Installation {
         });
     }
 
-    private static String readTokenFile(File token) throws IOException {
-        RandomAccessFile f = new RandomAccessFile(token, "r");
-        byte[] bytes = new byte[(int) f.length()];
-        f.readFully(bytes);
-        f.close();
-        return new String(bytes);
+    public synchronized static String readTokenFile(Context context) throws IOException {
+        try {
+            File tokenFile = new File(context.getFilesDir(), TOKEN);
+            RandomAccessFile f = new RandomAccessFile(tokenFile, "r");
+            byte[] bytes = new byte[(int) f.length()];
+            f.readFully(bytes);
+            f.close();
+            // symetrical crypto here
+            return new String(bytes);
+        } catch (FileNotFoundException ex) {
+            Toast.makeText(context, "Can't find token authentication", Toast.LENGTH_LONG).show();
+            return null;
+        }
     }
 
 }

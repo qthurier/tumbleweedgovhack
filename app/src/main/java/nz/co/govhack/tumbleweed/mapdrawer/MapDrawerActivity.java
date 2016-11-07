@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -56,7 +58,6 @@ public class MapDrawerActivity extends AppCompatActivity
 
     private ArrayList<String> favoriteParks;
     String installationId = "";
-    String token = "";
     MapsFragment fragment;
 
 
@@ -82,7 +83,7 @@ public class MapDrawerActivity extends AppCompatActivity
 
         // load stuff required for filtering --> the installation id and the parks
         installationId = Installation.id(getApplicationContext());
-        token = Installation.token(getApplicationContext());
+        Installation.getToken(installationId, getApplicationContext());
 
         String json = Utils.loadJSONFromAsset(this.getApplicationContext().getAssets());
         try {
@@ -143,7 +144,11 @@ public class MapDrawerActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.favorite_playgrounds) {
-            getFavoritesPlaygrounds();
+            try {
+                getFavoritesPlaygrounds();
+            } catch (IOException e) {
+                Toast.makeText(this.getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+            }
         } else if (id == R.id.all_playgrounds) {
             parksJson = new JSONArray();
             for(int i = 0; i < allParksJson.length(); i++) {
@@ -157,9 +162,17 @@ public class MapDrawerActivity extends AppCompatActivity
             fragment.getMyMap().clear();
             fragment.onMapReady(fragment.getMyMap());
         } else if (id == R.id.visited_playgrounds) {
-            getVisitedPlaygrounds();
+            try {
+                getVisitedPlaygrounds();
+            } catch (IOException e) {
+                Toast.makeText(this.getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+            }
         } else if (id == R.id.top_playgrounds) {
-            getTopPlaygrounds(getResources().getInteger(R.integer.top));
+            try {
+                getTopPlaygrounds(getResources().getInteger(R.integer.top));
+            } catch (IOException e) {
+                Toast.makeText(this.getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+            }
         } else if (id == R.id.nav_share) {
             shareApp();
 
@@ -190,12 +203,12 @@ public class MapDrawerActivity extends AppCompatActivity
     /* Endpoint Calls functions */
 
 
-    private void getFavoritesPlaygrounds() { // might be better to look for the favorite at start to avoid the runOnUiThread call
+    private void getFavoritesPlaygrounds() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_favorite_list_url);
         Request request = new Request.Builder().url(url + "?installation_id=" + installationId)
                 .addHeader("Id", installationId)
-                .addHeader("Token", token).get().build();
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -244,17 +257,23 @@ public class MapDrawerActivity extends AppCompatActivity
                     Log.i("****", "The Http response is: " + response.toString());
             } else {
                 Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
             }
           }
        });
     }
 
-    private void getVisitedPlaygrounds() { // might be better to look for the visited at start to avoid the runOnUiThread call
+    private void getVisitedPlaygrounds() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_visit_list_url);
         Request request = new Request.Builder().url(url + "?installation_id=" + installationId)
                 .addHeader("Id", installationId)
-                .addHeader("Token", token).get().build();
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -301,17 +320,23 @@ public class MapDrawerActivity extends AppCompatActivity
                 Log.i("****", "The Http response is: " + response.toString());
             } else {
                   Log.i("****", "unsuccessful http request");
+                  runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                    }
+                    });
             }
           }
         });
     }
 
-    private void getTopPlaygrounds(int top) { // might be better to look for the top at start to avoid the runOnUiThread call
+    private void getTopPlaygrounds(int top) throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_top_url);
         Request request = new Request.Builder().url(url + "?top=" + String.valueOf(top))
                 .addHeader("Id", installationId)
-                .addHeader("Token", token).get().build();
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -359,6 +384,12 @@ public class MapDrawerActivity extends AppCompatActivity
                     Log.i("****", "The Http response is: " + response.toString());
                 } else {
                     Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             }
         });
