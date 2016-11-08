@@ -179,7 +179,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                 PlaygroundMarker pm = new PlaygroundMarker(lat, lon, name.trim(), items, address.trim());
                 mClusterManager.addItem(pm);
 
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, defaultZoom));
                 mMarkers.put(m, id);
                 mPlaygroundMarkers.put(pm, id);
 
