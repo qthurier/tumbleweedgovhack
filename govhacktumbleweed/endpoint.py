@@ -35,7 +35,7 @@ class Token(webapp2.RequestHandler): # the only one which unherit from BasicHand
     def get(self):
       installation_id = self.request.get('installation_id')
       token = os.urandom(24).encode('hex')
-      old_token_list = EndpointToken.query(EndpointToken.installation_id == installation_id)
+      old_token_list = EndpointToken.query(EndpointToken.installation_id == installation_id).fetch(100)
       if len(old_token_list) > 0:
         for t in old_token_list:
           t.delete()
