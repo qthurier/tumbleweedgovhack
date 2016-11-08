@@ -98,7 +98,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         mUiSettings = mMap.getUiSettings();
 
         LatLng ll = new LatLng(defaultLat, defaultLon);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, defaultZoom));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, 5));
 
         // show current location
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
