@@ -18,7 +18,7 @@
         <item
             android:id="@+id/top_playgrounds"
             android:icon="@drawable/ic_grade_black_24dp"
-            android:title="Top ranked playgrounds" />
+            android:title="Top rated Playgrounds" />
         </menu>
     </item>
 

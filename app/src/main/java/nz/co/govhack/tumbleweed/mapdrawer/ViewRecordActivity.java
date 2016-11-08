@@ -106,17 +106,17 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                             if(!favoriteInit) {
                                 try {
                                     updateFavorite("save");
-                                    Snackbar.make(buttonView, "This playground has been added to your favorites", Snackbar.LENGTH_SHORT).show();
+                                    Snackbar.make(buttonView, "Playground added to favorites", Snackbar.LENGTH_LONG).show();
                                 } catch (IOException e) {
-                                    Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                                 }
                             }
                         } else {
                             try {
                                 updateFavorite("remove");
-                                Snackbar.make(buttonView, "This playground has been removed from your favorites", Snackbar.LENGTH_SHORT).show();
+                                Snackbar.make(buttonView, "Playground removed from favorites", Snackbar.LENGTH_LONG).show();
                             } catch (IOException e) {
-                                Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                             }
                         }
                     }
@@ -132,17 +132,17 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                             if(!visitedInit) {
                                 try {
                                     updateVisit("save");
-                                    Snackbar.make(buttonView, "Your visit in this playground has been saved", Snackbar.LENGTH_SHORT).show();
+                                    Snackbar.make(buttonView, "Visit recorded", Snackbar.LENGTH_LONG).show();
                                 } catch (IOException e) {
-                                    Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                                 }
                             }
                         } else {
                             try {
                                 updateVisit("remove");
-                                Snackbar.make(buttonView, "Your visit in this playground has been removed", Snackbar.LENGTH_SHORT).show();
+                                Snackbar.make(buttonView, "Visit removed", Snackbar.LENGTH_LONG).show();
                             } catch (IOException e) {
-                                Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                             }
                         }
                     }
