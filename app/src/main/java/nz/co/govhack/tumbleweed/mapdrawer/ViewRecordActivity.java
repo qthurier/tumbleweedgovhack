@@ -104,12 +104,20 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     public void onFavoriteChanged(MaterialFavoriteButton buttonView, boolean favorite) {
                         if (toolbarFavorite.isFavorite()) {
                             if(!favoriteInit) {
-                                updateFavorite("save");
-                                Snackbar.make(buttonView, "This playground has been added to your favorites", Snackbar.LENGTH_SHORT).show();
+                                try {
+                                    updateFavorite("save");
+                                    Snackbar.make(buttonView, "This playground has been added to your favorites", Snackbar.LENGTH_SHORT).show();
+                                } catch (IOException e) {
+                                    Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                                }
                             }
                         } else {
-                            updateFavorite("remove");
-                            Snackbar.make(buttonView, "This playground has been removed from your favorites", Snackbar.LENGTH_SHORT).show();
+                            try {
+                                updateFavorite("remove");
+                                Snackbar.make(buttonView, "This playground has been removed from your favorites", Snackbar.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
                 });
@@ -122,12 +130,20 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     public void onFavoriteChanged(MaterialFavoriteButton buttonView, boolean favorite) {
                         if (toolbarVisited.isFavorite()) {
                             if(!visitedInit) {
-                                updateVisit("save");
-                                Snackbar.make(buttonView, "Your visit in this playground has been saved", Snackbar.LENGTH_SHORT).show();
+                                try {
+                                    updateVisit("save");
+                                    Snackbar.make(buttonView, "Your visit in this playground has been saved", Snackbar.LENGTH_SHORT).show();
+                                } catch (IOException e) {
+                                    Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                                }
                             }
                         } else {
-                            updateVisit("remove");
-                            Snackbar.make(buttonView, "Your visit in this playground has been removed", Snackbar.LENGTH_SHORT).show();
+                            try {
+                                updateVisit("remove");
+                                Snackbar.make(buttonView, "Your visit in this playground has been removed", Snackbar.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
                 });
@@ -199,11 +215,15 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         setRatingBar = (RatingBar) findViewById(R.id.setRating);
         countText = (TextView) findViewById(R.id.countText);
 
-        recordClick();
-        updateGlobalRating();
-        checkIfFavorite();
-        checkIfVisited();
 
+        try {
+            recordClick();
+            updateGlobalRating();
+            checkIfFavorite();
+            checkIfVisited();
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+        }
 
         // ranking dialog
         //Button rankBtn = (Button) findViewById(R.id.rank_dialog_button);
@@ -215,7 +235,11 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 rankDialog.setCancelable(true);
                 getRatingBar = (RatingBar)rankDialog.findViewById(R.id.dialog_ratingbar);
 
-                updateInstallationRating();
+                try {
+                    updateInstallationRating();
+                } catch (IOException e) {
+                    Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                }
                 getRatingBar.setOnRatingBarChangeListener(ViewRecordActivity.this);
 
                 Button updateButton = (Button) rankDialog.findViewById(R.id.rank_dialog_button);
@@ -334,10 +358,12 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         return null;
     }
 
-    private void updateGlobalRating() {
+    private void updateGlobalRating() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.rating_url);
-        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName).get().build();
+        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -345,42 +371,54 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    String jsonData = response.body().string();
-                    JSONObject Jobject = new JSONObject(jsonData);
-                    count = (int) Jobject.getDouble("count");
-                    if(count>0) {
-                        globalRate = (float) Jobject.getDouble("rating");
-                    }
-                } catch (JSONException e) {
-                    Log.i("****", "Rating update has failed", e);
-                } catch (IOException e) {
-                    Log.i("****", "Rating update has failed", e);
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setRatingBar.setRating((float) globalRate);
-                        if(count == 0) {
-                            countText.setText("No rating yet");
-                        } else if(count == 1) {
-                            countText.setText("1 user rating");
-                        } else {
-                            countText.setText(count + " user ratings");
+                if (response.code() == 200) {
+                    try {
+                        String jsonData = response.body().string();
+                        JSONObject Jobject = new JSONObject(jsonData);
+                        count = (int) Jobject.getDouble("count");
+                        if (count > 0) {
+                            globalRate = (float) Jobject.getDouble("rating");
                         }
+                    } catch (JSONException e) {
+                        Log.i("****", "Rating update has failed", e);
+                    } catch (IOException e) {
+                        Log.i("****", "Rating update has failed", e);
                     }
-                });
-                Log.i("****", "Rating has been updated");
-                Log.i("****", "The Http response is: " + response.toString());
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setRatingBar.setRating((float) globalRate);
+                            if (count == 0) {
+                                countText.setText("No rating yet");
+                            } else if (count == 1) {
+                                countText.setText("1 user rating");
+                            } else {
+                                countText.setText(count + " user ratings");
+                            }
+                        }
+                    });
+                    Log.i("****", "Rating has been updated");
+                    Log.i("****", "The Http response is: " + response.toString());
+                } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
     }
 
-    private void updateInstallationRating() {
+    private void updateInstallationRating() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.rating_url);
-        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
+        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -388,6 +426,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 200) {
                 try {
                     String jsonData = response.body().string();
                     JSONObject Jobject = new JSONObject(jsonData);
@@ -407,12 +446,21 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                     }
                 });
                 Log.i("****", "The Http response is: " + response.toString());
+            } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
         initialisation = false;
     }
 
-    private void postRating() {
+    private void postRating() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.rating_url);
         FormBody formBody = new FormBody.Builder()
@@ -423,6 +471,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 .build();
         Request request = new Request.Builder()
                 .url(url)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext()))
                 .post(formBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
@@ -432,14 +482,24 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 200) {
                 updateGlobalRating();
                 Log.i("****", "Rating has been recorded");
                 Log.i("****", "The Http response is: " + response.toString());
+            } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
     }
 
-    private void updateFavorite(String type) {
+    private void updateFavorite(String type) throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.remove_favorite_url); // default behavior is remove
         if(type.equals("save")) {
@@ -453,6 +513,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 .build();
         Request request = new Request.Builder()
                 .url(url)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext()))
                 .post(formBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
@@ -462,9 +524,19 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 200) {
                 updateGlobalRating();
                 Log.i("****", "Favorite has been updated");
                 Log.i("****", "The Http response is: " + response.toString());
+            } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
         isFavorite = false; // default behavior is remove
@@ -473,7 +545,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         }
     }
 
-    private void updateVisit(String type) {
+    private void updateVisit(String type) throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.remove_visit_url); // default behavior is remove
         if(type.equals("save")) {
@@ -488,6 +560,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         Request request = new Request.Builder()
                 .url(url)
                 .post(formBody)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext()))
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -496,9 +570,19 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                updateGlobalRating();
-                Log.i("****", "Visit has been updated");
-                Log.i("****", "The Http response is: " + response.toString());
+                if (response.code() == 200) {
+                    updateGlobalRating();
+                    Log.i("****", "Visit has been updated");
+                    Log.i("****", "The Http response is: " + response.toString());
+                } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
         isVisited = false; // default behavior is remove
@@ -507,7 +591,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         }
     }
 
-    private void recordClick() {
+    private void recordClick() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.store_click_url);
         FormBody formBody = new FormBody.Builder()
@@ -520,6 +604,8 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         Request request = new Request.Builder()
                 .url(url)
                 .post(formBody)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext()))
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -528,16 +614,28 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 200) {
                 Log.i("****", "Click has been recorded");
                 Log.i("****", "The Http response is: " + response.toString());
+            } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
     }
 
-    private void checkIfFavorite() {
+    private void checkIfFavorite() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.check_favorite_url);
-        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
+        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -545,32 +643,44 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    String jsonData = response.body().string();
-                    JSONObject Jobject = new JSONObject(jsonData);
-                    isFavorite = (Boolean) Jobject.getBoolean("check");
-                } catch (JSONException e) {
-                    Log.i("****", "Favorite check failed", e);
-                } catch (IOException e) {
-                    Log.i("****", "Favorite check failed", e);
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarFavorite.setFavorite(isFavorite);
-                        favoriteInit = false;
+                if (response.code() == 200) {
+                    try {
+                        String jsonData = response.body().string();
+                        JSONObject Jobject = new JSONObject(jsonData);
+                        isFavorite = (Boolean) Jobject.getBoolean("check");
+                    } catch (JSONException e) {
+                        Log.i("****", "Favorite check failed", e);
+                    } catch (IOException e) {
+                        Log.i("****", "Favorite check failed", e);
                     }
-                });
-                Log.i("**** check if favorite", "The Http response is: " + response.toString());
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toolbarFavorite.setFavorite(isFavorite);
+                            favoriteInit = false;
+                        }
+                    });
+                    Log.i("**** check if favorite", "The Http response is: " + response.toString());
+                } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
     }
 
-    private void checkIfVisited() {
+    private void checkIfVisited() throws IOException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.check_visit_url);
-        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId).get().build();
+        Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId)
+                .addHeader("Id", installationId)
+                .addHeader("Token", Installation.readTokenFile(getApplicationContext())).get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -578,24 +688,34 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    String jsonData = response.body().string();
-                    JSONObject Jobject = new JSONObject(jsonData);
-                    isVisited = (Boolean) Jobject.getBoolean("check");
-                } catch (JSONException e) {
-                    Log.i("****", "Visit check failed", e);
-                } catch (IOException e) {
-                    Log.i("****", "Visit check failed", e);
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        toolbarVisited.setFavorite(isVisited);
-                        visitedInit = false;
+                if (response.code() == 200) {
+                    try {
+                        String jsonData = response.body().string();
+                        JSONObject Jobject = new JSONObject(jsonData);
+                        isVisited = (Boolean) Jobject.getBoolean("check");
+                    } catch (JSONException e) {
+                        Log.i("****", "Visit check failed", e);
+                    } catch (IOException e) {
+                        Log.i("****", "Visit check failed", e);
                     }
-                });
-                Log.i("**** check if visited", "The Http response is: " + response.toString());
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            toolbarVisited.setFavorite(isVisited);
+                            visitedInit = false;
+                        }
+                    });
+                    Log.i("**** check if visited", "The Http response is: " + response.toString());
+                } else {
+                    Log.i("****", "unsuccessful http request");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Authentication failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
     }
@@ -605,7 +725,11 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
         mark = String.valueOf(Math.round(rating));
         if(!initialisation) {
-            postRating();
+            try {
+                postRating();
+            } catch (IOException e) {
+                Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
