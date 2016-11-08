@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Kiwi Playgrounds</string>
-    <string name="endpoint_key">foobarbazquxquux</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -10,24 +9,6 @@
     <string name="action_map_type_normal">Map</string>
     <string name="action_map_type_hybrid">Satellite</string>
     <string name="title_activity_maps">Map</string>
-    <string name="store_click_url">https://govhacktumbleweed.appspot.com/store_click</string>
-
-    <string name="get_token_url">https://govhacktumbleweed.appspot.com/token</string>
-
-    <string name="get_favorite_list_url">https://govhacktumbleweed.appspot.com/favorite_endpoint</string>
-    <string name="get_visit_list_url">https://govhacktumbleweed.appspot.com/visit_endpoint</string>
-
-    <string name="save_favorite_url">https://govhacktumbleweed.appspot.com/favorite_endpoint</string>
-    <string name="save_visit_url">https://govhacktumbleweed.appspot.com/visit_endpoint</string>
-
-    <string name="remove_favorite_url">https://govhacktumbleweed.appspot.com/favorite_endpoint</string>
-    <string name="remove_visit_url">https://govhacktumbleweed.appspot.com/visit_endpoint</string>
-
-    <string name="check_favorite_url">https://govhacktumbleweed.appspot.com/check_favorite</string>
-    <string name="check_visit_url">https://govhacktumbleweed.appspot.com/check_visit</string>
-
-    <string name="get_top_url">https://govhacktumbleweed.appspot.com/top</string>
-    <string name="rating_url">https://govhacktumbleweed.appspot.com/rating</string>
 
 
     <!--    Permissions    -->

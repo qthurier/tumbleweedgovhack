@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="endpoint_key">foobarbazquxquux</string>
+    <string name="store_click_url">https://govhacktumbleweed.appspot.com/store_click</string>
+    <string name="get_token_url">https://govhacktumbleweed.appspot.com/token</string>
+    <string name="get_favorite_list_url">https://govhacktumbleweed.appspot.com/favorite_endpoint</string>
+    <string name="get_visit_list_url">https://govhacktumbleweed.appspot.com/visit_endpoint</string>
+    <string name="save_favorite_url">https://govhacktumbleweed.appspot.com/favorite_endpoint</string>
+    <string name="save_visit_url">https://govhacktumbleweed.appspot.com/visit_endpoint</string>
+    <string name="remove_favorite_url">https://govhacktumbleweed.appspot.com/favorite_endpoint</string>
+    <string name="remove_visit_url">https://govhacktumbleweed.appspot.com/visit_endpoint</string>
+    <string name="check_favorite_url">https://govhacktumbleweed.appspot.com/check_favorite</string>
+    <string name="check_visit_url">https://govhacktumbleweed.appspot.com/check_visit</string>
+    <string name="get_top_url">https://govhacktumbleweed.appspot.com/top</string>
+    <string name="rating_url">https://govhacktumbleweed.appspot.com/rating</string>
+
+</resources>
