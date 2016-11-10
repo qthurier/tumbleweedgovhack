@@ -6,8 +6,26 @@ import json
 import urllib2
 import os
 
-class EndpointToken(ndb.Model):
+from Crypto import Random
+from Crypto.Cipher import AES
+
+def pad(s):
+    return s + b"\0" * (AES.block_size - len(s) % AES.block_size)
+
+def encrypt(message, key, key_size=128):
+    message = pad(message)
+    #iv = Random.new().read(AES.block_size)
+    iv = ""
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    return iv + cipher.encrypt(message)
+
+class EndpointKey(ndb.Model):
     """A model to store the endpoint keys"""
+    key = ndb.StringProperty()
+    created_at = ndb.DateTimeProperty(auto_now_add=True)
+
+class EndpointToken(ndb.Model):
+    """A model to store the endpoint tokens"""
     installation_id = ndb.StringProperty()
     token = ndb.StringProperty()
     created_at = ndb.DateTimeProperty(auto_now_add=True)
@@ -33,6 +51,7 @@ class BasicHandler(webapp2.RequestHandler):
 
 class Token(webapp2.RequestHandler): # the only one which unherit from BasicHandler
     def get(self):
+      key = EndpointKey.query().fetch(1)[0].key
       installation_id = self.request.get('installation_id')
       token = os.urandom(24).encode('hex')
       old_token_list = EndpointToken.query(EndpointToken.installation_id == installation_id).fetch(100)
@@ -40,7 +59,7 @@ class Token(webapp2.RequestHandler): # the only one which unherit from BasicHand
         for t in old_token_list:
           t.delete()
       EndpointToken(installation_id=installation_id, token=token).put()
-      body = {'token': token}
+      body = {'token': encrypt(token, key)}
       self.response.status = 200
       self.response.headers['Content-Type'] = 'application/json'   
       self.response.out.write(json.dumps(body))

@@ -112,6 +112,9 @@ public class Installation {
             f.readFully(bytes);
             f.close();
             // symetrical crypto here
+            Log.i("****", Encryptor.decrypt(mContext.getResources().getString(R.string.endpoint_key),
+                                            "",
+                                            new String(bytes)));
             return new String(bytes);
         } catch (FileNotFoundException ex) {
             Toast.makeText(context, "Can't find token authentication", Toast.LENGTH_LONG).show();
