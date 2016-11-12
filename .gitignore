@@ -7,3 +7,4 @@
 /build
 /captures
 /app/src/main/res/values/endpoint.xml
+/app/src/release/res/values/google_maps_api.xml
