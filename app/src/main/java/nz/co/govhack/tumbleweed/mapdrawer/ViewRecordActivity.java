@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -109,6 +111,10 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                     Snackbar.make(buttonView, "Playground added to favorites", Snackbar.LENGTH_LONG).show();
                                 } catch (IOException e) {
                                     Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                                } catch (NoSuchAlgorithmException e) {
+                                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                                } catch (InvalidKeyException e) {
+                                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                                 }
                             }
                         } else {
@@ -116,6 +122,10 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                 updateFavorite("remove");
                                 Snackbar.make(buttonView, "Playground removed from favorites", Snackbar.LENGTH_LONG).show();
                             } catch (IOException e) {
+                                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                            } catch (NoSuchAlgorithmException e) {
+                                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                            } catch (InvalidKeyException e) {
                                 Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                             }
                         }
@@ -135,6 +145,10 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                     Snackbar.make(buttonView, "Visit recorded", Snackbar.LENGTH_LONG).show();
                                 } catch (IOException e) {
                                     Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                                } catch (NoSuchAlgorithmException e) {
+                                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                                } catch (InvalidKeyException e) {
+                                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                                 }
                             }
                         } else {
@@ -142,6 +156,10 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                                 updateVisit("remove");
                                 Snackbar.make(buttonView, "Visit removed", Snackbar.LENGTH_LONG).show();
                             } catch (IOException e) {
+                                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                            } catch (NoSuchAlgorithmException e) {
+                                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                            } catch (InvalidKeyException e) {
                                 Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                             }
                         }
@@ -222,7 +240,11 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             checkIfFavorite();
             checkIfVisited();
         } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+        } catch (NoSuchAlgorithmException e) {
+            Toast.makeText(getApplicationContext(), "Error with the  authentication token", Toast.LENGTH_LONG).show();
+        } catch (InvalidKeyException e) {
+            Toast.makeText(getApplicationContext(), "Error with the  authentication token", Toast.LENGTH_LONG).show();
         }
 
         // ranking dialog
@@ -238,7 +260,11 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
                 try {
                     updateInstallationRating();
                 } catch (IOException e) {
-                    Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                } catch (NoSuchAlgorithmException e) {
+                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                } catch (InvalidKeyException e) {
+                    Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
                 }
                 getRatingBar.setOnRatingBarChangeListener(ViewRecordActivity.this);
 
@@ -358,7 +384,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         return null;
     }
 
-    private void updateGlobalRating() throws IOException {
+    private void updateGlobalRating() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.rating_url);
         Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName)
@@ -413,7 +439,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         });
     }
 
-    private void updateInstallationRating() throws IOException {
+    private void updateInstallationRating() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.rating_url);
         Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId)
@@ -460,7 +486,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         initialisation = false;
     }
 
-    private void postRating() throws IOException {
+    private void postRating() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.rating_url);
         FormBody formBody = new FormBody.Builder()
@@ -483,8 +509,14 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
-                updateGlobalRating();
-                Log.i("****", "Rating has been recorded");
+                    try {
+                        updateGlobalRating();
+                    } catch (InvalidKeyException e) {
+                        Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                    } catch (NoSuchAlgorithmException e) {
+                        Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                    }
+                    Log.i("****", "Rating has been recorded");
                 Log.i("****", "The Http response is: " + response.toString());
             } else {
                     Log.i("****", "unsuccessful http request");
@@ -499,7 +531,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         });
     }
 
-    private void updateFavorite(String type) throws IOException {
+    private void updateFavorite(String type) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.remove_favorite_url); // default behavior is remove
         if(type.equals("save")) {
@@ -525,8 +557,14 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
-                updateGlobalRating();
-                Log.i("****", "Favorite has been updated");
+                    try {
+                        updateGlobalRating();
+                    } catch (InvalidKeyException e) {
+                        Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                    } catch (NoSuchAlgorithmException e) {
+                        Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                    }
+                    Log.i("****", "Favorite has been updated");
                 Log.i("****", "The Http response is: " + response.toString());
             } else {
                     Log.i("****", "unsuccessful http request");
@@ -545,7 +583,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         }
     }
 
-    private void updateVisit(String type) throws IOException {
+    private void updateVisit(String type) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.remove_visit_url); // default behavior is remove
         if(type.equals("save")) {
@@ -571,7 +609,13 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
-                    updateGlobalRating();
+                    try {
+                        updateGlobalRating();
+                    } catch (InvalidKeyException e) {
+                        Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                    } catch (NoSuchAlgorithmException e) {
+                        Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                    }
                     Log.i("****", "Visit has been updated");
                     Log.i("****", "The Http response is: " + response.toString());
                 } else {
@@ -591,7 +635,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         }
     }
 
-    private void recordClick() throws IOException {
+    private void recordClick() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.store_click_url);
         FormBody formBody = new FormBody.Builder()
@@ -630,7 +674,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         });
     }
 
-    private void checkIfFavorite() throws IOException {
+    private void checkIfFavorite() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.check_favorite_url);
         Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId)
@@ -675,7 +719,7 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         });
     }
 
-    private void checkIfVisited() throws IOException {
+    private void checkIfVisited() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.check_visit_url);
         Request request = new Request.Builder().url(url + "?playground_name=" + playgroundName + "&installation_id=" + installationId)
@@ -726,9 +770,15 @@ public class ViewRecordActivity extends AppCompatActivity implements RatingBar.O
         mark = String.valueOf(Math.round(rating));
         if(!initialisation) {
             try {
-                postRating();
+                try {
+                    postRating();
+                } catch (InvalidKeyException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                } catch (NoSuchAlgorithmException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                }
             } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -1,8 +1,12 @@
 package nz.co.govhack.tumbleweed.mapdrawer;
 
 import android.content.Context;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,8 +17,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -104,18 +113,19 @@ public class Installation {
         });
     }
 
-    public synchronized static String readTokenFile(Context context) throws IOException {
+    public synchronized static String readTokenFile(Context context) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         try {
             File tokenFile = new File(context.getFilesDir(), TOKEN);
             RandomAccessFile f = new RandomAccessFile(tokenFile, "r");
             byte[] bytes = new byte[(int) f.length()];
             f.readFully(bytes);
             f.close();
-            // symetrical crypto here
-            Log.i("****", Encryptor.decrypt(mContext.getResources().getString(R.string.endpoint_key),
-                                            "",
-                                            new String(bytes)));
-            return new String(bytes);
+            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(context.getResources().getString(R.string.endpoint_key).getBytes(), "HmacSHA256");
+            sha256_HMAC.init(secretKey);
+            byte[] hash = sha256_HMAC.doFinal(bytes);
+            String check = new String(Hex.encodeHex(hash));
+            return new String(check);
         } catch (FileNotFoundException ex) {
             Toast.makeText(context, "Can't find token authentication", Toast.LENGTH_LONG).show();
             return null;

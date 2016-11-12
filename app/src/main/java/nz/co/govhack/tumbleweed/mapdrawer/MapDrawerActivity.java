@@ -35,6 +35,8 @@ import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import okhttp3.Call;
@@ -145,9 +147,15 @@ public class MapDrawerActivity extends AppCompatActivity
 
         if (id == R.id.favorite_playgrounds) {
             try {
-                getFavoritesPlaygrounds();
+                try {
+                    getFavoritesPlaygrounds();
+                } catch (InvalidKeyException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                } catch (NoSuchAlgorithmException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                }
             } catch (IOException e) {
-                Toast.makeText(this.getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
             }
         } else if (id == R.id.all_playgrounds) {
             parksJson = new JSONArray();
@@ -163,15 +171,27 @@ public class MapDrawerActivity extends AppCompatActivity
             fragment.onMapReady(fragment.getMyMap());
         } else if (id == R.id.visited_playgrounds) {
             try {
-                getVisitedPlaygrounds();
+                try {
+                    getVisitedPlaygrounds();
+                } catch (InvalidKeyException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                } catch (NoSuchAlgorithmException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                }
             } catch (IOException e) {
-                Toast.makeText(this.getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
             }
         } else if (id == R.id.top_playgrounds) {
             try {
-                getTopPlaygrounds(getResources().getInteger(R.integer.top));
+                try {
+                    getTopPlaygrounds(getResources().getInteger(R.integer.top));
+                } catch (InvalidKeyException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                } catch (NoSuchAlgorithmException e) {
+                    Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
+                }
             } catch (IOException e) {
-                Toast.makeText(this.getApplicationContext(), "Error with then authentication token", Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getApplicationContext(), "Error with the authentication token", Toast.LENGTH_LONG).show();
             }
         } else if (id == R.id.nav_share) {
             shareApp();
@@ -203,7 +223,7 @@ public class MapDrawerActivity extends AppCompatActivity
     /* Endpoint Calls functions */
 
 
-    private void getFavoritesPlaygrounds() throws IOException {
+    private void getFavoritesPlaygrounds() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_favorite_list_url);
         Request request = new Request.Builder().url(url + "?installation_id=" + installationId)
@@ -268,7 +288,7 @@ public class MapDrawerActivity extends AppCompatActivity
        });
     }
 
-    private void getVisitedPlaygrounds() throws IOException {
+    private void getVisitedPlaygrounds() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_visit_list_url);
         Request request = new Request.Builder().url(url + "?installation_id=" + installationId)
@@ -331,7 +351,7 @@ public class MapDrawerActivity extends AppCompatActivity
         });
     }
 
-    private void getTopPlaygrounds(int top) throws IOException {
+    private void getTopPlaygrounds(int top) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         OkHttpClient client = new OkHttpClient();
         String url = getResources().getString(R.string.get_top_url);
         Request request = new Request.Builder().url(url + "?top=" + String.valueOf(top))
